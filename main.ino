@@ -39,7 +39,7 @@ boolean bottleHere;
 #define STX 2
 #define ETX 3
 
-#define timelimit 7000
+#define timelimit 5000
 #define min_distance 33 //to avoid false data from distance sensor
 #define max_distance 37
 
@@ -99,7 +99,7 @@ void loop() {
      time = millis();
      if ((time - inactivity) > timelimit) {
         exitWait = true;
-        digitalWrite(bluePin,LOW);
+        digitalWrite(greenPin,LOW);
         upperServo.write(SERVOCLOSED);
         redBlink();
       }
@@ -136,9 +136,10 @@ void loop() {
             digitalWrite(redPin, HIGH);
             beep(10);
           }
-          delay(1000);
+          delay(100);
           upperServo.write(SERVOCLOSED);
           digitalWrite(redPin,LOW);
+          redBlink();
           exitWait= true;
         }
       } 
