@@ -9,7 +9,6 @@ int rx_counter; //for RFID
 int tx_data;
 char rx_data[14]; // 1+10+2+1
 
-String cardCode = "12345678912345678912";
 String command;
 
 char type[50];
@@ -35,12 +34,12 @@ boolean bottleHere;
 #define redPin A3 //LEDs
 #define greenPin A1
 #define bluePin A2 
-#define innerPin A0 //inner lighting
+#define innerPin 13 //inner lighting
 
 #define STX 2
 #define ETX 3
 
-#define timelimit 10000
+#define timelimit 7000
 #define min_distance 33 //to avoid false data from distance sensor
 #define max_distance 37
 
@@ -84,32 +83,34 @@ void loop() {
   scannedUser = "";
   delay(10);
   scannedUser = checkRfid ();
-  if ((scannedUser != currentUser)&&(scannedUser != "")) {
+  
+  if (scannedUser != "") {
     digitalWrite(bluePin,LOW);
     beep(100);
     if (checkUser() == true) {
-    inactivity = millis();
     currentUser = scannedUser;
     scannedUser = "";
     digitalWrite(greenPin, HIGH);
-    upperServo.write(SERVOOPEN);
-
+    
+    inactivity = millis();
     while (exitWait == false) {
-      time = millis();
-        if ((time - inactivity) > timelimit) {
+    upperServo.write(SERVOOPEN);
+    
+     time = millis();
+     if ((time - inactivity) > timelimit) {
         exitWait = true;
+        digitalWrite(bluePin,LOW);
+        upperServo.write(SERVOCLOSED);
         redBlink();
       }
 
       if (checkBottle() == true) {
         delay(100);
-        exitWait = true;
         bottleHere = true;
-      }      
-    }
-    upperServo.write(SERVOCLOSED);
+      } 
 
-    if (bottleHere == true) {
+      if (bottleHere == true) {
+      upperServo.write(SERVOCLOSED);
       beep(100);
       currentType = recognizeStuff();
       digitalWrite (innerPin,LOW);
@@ -119,34 +120,44 @@ void loop() {
         downServo.write(SERVOMID);
         pointsPET();
         beep(100);
+        inactivity = millis();
       } else {
         if (currentType == "банка алюминиевая") {
           downServo.write(SERVOAL);
           delay(1500);
           downServo.write(SERVOMID);
-          pointsAl();
+          pointsPET();
           beep(100);
+          inactivity = millis();
         } else {
-          exitWait = true;
           digitalWrite(greenPin, LOW);
-          redBlink();
+          while (checkBottle() == true) {
+            upperServo.write(SERVOOPEN);
+            digitalWrite(redPin, HIGH);
+            beep(10);
+          }
+          delay(1000);
+          upperServo.write(SERVOCLOSED);
+          digitalWrite(redPin,LOW);
+          exitWait= true;
         }
       } 
     }
-    for (int i; i <=100; i++) {
+    bottleHere = false;  
+   }
+    
+  } else {
+        redBlink();
+      }
+      for (int i; i <=50; i++) {
       currentUser=checkRfid();
       delay(3);
     }
-   } else {
-        beep(1000);
-        redBlink();
-      }
-  }
+ }
   
 digitalWrite(greenPin, LOW);
 digitalWrite(bluePin,HIGH);
 exitWait = false;
-bottleHere = false;
 currentUser = "";
 }
 
@@ -223,6 +234,7 @@ int distance1 () {
 
 String recognizeStuff () {
   String stuffType;
+  delay(500);
   digitalWrite (innerPin,HIGH);
     if ((checkBottle() == true) && (obman == 1)) {
       delay(3000);
