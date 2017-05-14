@@ -20,7 +20,7 @@ String scannedUser;
 String currentType;
 
 unsigned long time;
-unsigned long inactivity = 0000; //beginning time 
+unsigned long inactivity = 1000; //beginning time 
 
 boolean exitWait;
 boolean bottleHere;
@@ -39,13 +39,13 @@ boolean bottleHere;
 #define STX 2
 #define ETX 3
 
-#define timelimit 5000
+#define timelimit 7000
 #define min_distance 33 //to avoid false data from distance sensor
 #define max_distance 37
 
 #define SERVOAL  10 // al
 #define SERVOPET  160 //pet
-#define SERVOMID  85 //closed
+#define SERVOMID  100 //closed
 #define SERVOOPEN 130 //upper thing open
 #define SERVOCLOSED 55 //upper thing closed
 
@@ -111,8 +111,9 @@ void loop() {
 
       if (bottleHere == true) {
       upperServo.write(SERVOCLOSED);
+      delay(50);
       beep(100);
-      currentType = recognizeStuff();
+      if (checkBottle() == true) {currentType = recognizeStuff(); }
       digitalWrite (innerPin,LOW);
       if (currentType == "бутылка пластиковая") {
         downServo.write(SERVOPET);
@@ -121,6 +122,7 @@ void loop() {
         pointsPET();
         beep(100);
         inactivity = millis();
+        exitWait= true;
       } else {
         if (currentType == "банка алюминиевая") {
           downServo.write(SERVOAL);
@@ -129,6 +131,7 @@ void loop() {
           pointsPET();
           beep(100);
           inactivity = millis();
+          exitWait= true;
         } else {
           digitalWrite(greenPin, LOW);
           while (checkBottle() == true) {
@@ -149,8 +152,9 @@ void loop() {
     
   } else {
         redBlink();
+        delay(1000);
       }
-      for (int i; i <=50; i++) {
+      for (int i; i <=75; i++) {
       currentUser=checkRfid();
       delay(3);
     }
@@ -234,10 +238,14 @@ int distance1 () {
 }
 
 String recognizeStuff () {
-  String stuffType;
-  delay(500);
+  //String stuffType;
+  delay (500);
   digitalWrite (innerPin,HIGH);
-    if ((checkBottle() == true) && (obman == 1)) {
+  Process p;
+  p.runShellCommand("python /mnt/sda1/pyinbash.py");
+  while (p.running());
+  
+  if ((checkBottle() == true) && (obman == 1)) {
       delay(3000);
       obman = 0;
       return "бутылка пластиковая";
@@ -250,13 +258,9 @@ String recognizeStuff () {
       return "пустота";
     }
   }
-  /*Console.println ("Запускаю скрипт распознавания"); 
-  Process p;
-  p.runShellCommand("python /mnt/sda1/pyinbash.py");
-
-  while (p.running());
+ // Console.println ("Запускаю скрипт распознавания"); 
   
-  Bridge.get("GARBAGE", type, 50);
+  /*Bridge.get("GARBAGE", type, 50);
   Bridge.put("GARBAGE", "OOOPS");
   stuffType = type;
   strcpy(type,"");
