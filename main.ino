@@ -11,7 +11,7 @@ char rx_data[14]; // 1+10+2+1
 
 String command;
 
-char type[50];
+char type[100];
 
 int obman = 1;
 
@@ -43,11 +43,11 @@ boolean bottleHere;
 #define min_distance 33 //to avoid false data from distance sensor
 #define max_distance 37
 
-#define SERVOAL  10 // al
+#define SERVOAL  35 // al
 #define SERVOPET  160 //pet
-#define SERVOMID  100 //closed
-#define SERVOOPEN 130 //upper thing open
-#define SERVOCLOSED 55 //upper thing closed
+#define SERVOMID  107 //closed
+#define SERVOOPEN 125 //upper thing open
+#define SERVOCLOSED 49 //upper thing closed
 
 SoftwareSerial softSerial(11, 12); //for RFID
 Servo downServo;
@@ -55,7 +55,7 @@ Servo upperServo;
 
 void setup() {
   Bridge.begin();
-  memset(type, 0, 50);
+  memset(type, 0, 100);
 //***********************************
   pinMode(buzzerPin, OUTPUT);
   pinMode(redPin, OUTPUT);
@@ -110,12 +110,13 @@ void loop() {
       } 
 
       if (bottleHere == true) {
+      currentType = "";
       upperServo.write(SERVOCLOSED);
       delay(50);
       beep(100);
       if (checkBottle() == true) {currentType = recognizeStuff(); }
       digitalWrite (innerPin,LOW);
-      if (currentType == "бутылка пластиковая") {
+      if (currentType == "прозрачная ПЭТ-бутылка из-под напитков 5-8 л") {
         downServo.write(SERVOPET);
         delay(1500);
         downServo.write(SERVOMID);
@@ -124,7 +125,7 @@ void loop() {
         inactivity = millis();
         exitWait= true;
       } else {
-        if (currentType == "банка алюминиевая") {
+        if (currentType == "алюминиевая банка") {
           downServo.write(SERVOAL);
           delay(1500);
           downServo.write(SERVOMID);
@@ -238,14 +239,14 @@ int distance1 () {
 }
 
 String recognizeStuff () {
-  //String stuffType;
+  String stuffType;
   delay (500);
   digitalWrite (innerPin,HIGH);
   Process p;
-  p.runShellCommand("python /mnt/sda1/pyinbash.py");
+  p.runShellCommand("python /mnt/sda1/pyinbash.py --recognize");
   while (p.running());
   
-  if ((checkBottle() == true) && (obman == 1)) {
+  /*if ((checkBottle() == true) && (obman == 1)) {
       delay(3000);
       obman = 0;
       return "бутылка пластиковая";
@@ -257,17 +258,14 @@ String recognizeStuff () {
     } else {
       return "пустота";
     }
-  }
+  } */
  // Console.println ("Запускаю скрипт распознавания"); 
   
-  /*Bridge.get("GARBAGE", type, 50);
+  Bridge.get("GARBAGE", type, 100);
   Bridge.put("GARBAGE", "OOOPS");
   stuffType = type;
   strcpy(type,"");
-  Console.print ("***** ");
-  Console.print (stuffType);
-  Console.println (" *****");
-  return stuffType;*/
+  return stuffType;
 }
 
 boolean checkBottle (){
@@ -305,12 +303,12 @@ boolean checkUser() {
   HttpClient client;
   command = "http://smartbin35.ru.mastertest.ru/api/checkuser?cardCode=" + scannedUser;
   client.get(command);
-
+  digitalWrite(innerPin,HIGH);
   while (client.available()) {
     char c = client.read();
     answer = answer + c;
   }
-  
+  digitalWrite(innerPin,LOW);
   if (answer == "true") {
     return true;
   } else {
