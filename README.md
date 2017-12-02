@@ -1,2 +1,5 @@
-# SmartBin-Beta
-This is a repository of the SmartBin:Beta Project. Here are some pieces of code from the Arduino side and from the Linux side.
+# SmartBin
+Исходный код проекта распространяется под свободный лицензией. Любой может использовать его в некоммерческих целях.
+Интересен проект http://smartbin.ru
+Есть вопросы по коду? http://smartbin.ru/ask/
+Группа VK с контактами разработчиков https://vk.com/smartbin
