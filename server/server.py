@@ -56,7 +56,8 @@ def main():
 
 def saveimg(image_data):
     path = cfg.PATH['data_folder']
-    path = path + str(datetime.datetime.now())
+    path = path + "image_" + \
+        datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     open(path,'wb').write(image_data)
     print("LOG: image saved as: " + path)
 
