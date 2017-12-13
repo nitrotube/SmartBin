@@ -5,6 +5,8 @@ import socket
 
 import label_image
 
+import datetime
+
 def main():
 
     host = '0.0.0.0'
@@ -20,7 +22,7 @@ def main():
     while 1:
         client, addr = server.accept()
         print("LOG:"+str(addr)+" connected\n")
-    
+
         print("LOG:Recieving image...")
         request = b""
 
@@ -38,9 +40,10 @@ def main():
 
         print("LOG:Complete\n")
 
-        print("LOG:Saving image...")
+        print("Saving image...")
         open(image_path, 'wb').write(data)
-        print("LOG:Complete\n")
+        saveimg(data)
+        print("Complete\n")
 
         print("LOG:start recognizing...")
         answer = label_image.get_class()
@@ -49,6 +52,13 @@ def main():
 
         client.send(answer.encode('utf-8'))
         client.close()
+
+
+def saveimg(image_data):
+    path = cfg.PATH['data_folder']
+    path = path + str(datetime.datetime.now())
+    open(path,'wb').write(image_data)
+    print("LOG: image saved as: " + path)
 
 if __name__ == '__main__':
     main()
