@@ -39,7 +39,7 @@ softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
 #load labels
 labels = [line.rstrip() for line in tf.gfile.GFile(cfg.PATH['labels'])]
 
-def get_class(file_name):
+def get_class():
 
     image_data = tf.gfile.FastGFile(cfg.PATH['current_img'], 'rb').read()
    

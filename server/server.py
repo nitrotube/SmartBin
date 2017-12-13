@@ -6,9 +6,10 @@ import socket
 import label_image
 
 def main():
+
     host = '0.0.0.0'
     port = 6006
-
+    print("LOG:server started at " + host + ":" + str(port) + "\n")
     image_path = cfg.PATH['current_img']
     server = socket.socket()
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
