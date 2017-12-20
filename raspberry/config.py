@@ -1,0 +1,29 @@
+BEEPER = 11
+
+UP_SERVO = 3  # Upper servo pina
+DOWN_SERVO = 2  # Down servo pin
+LOCK1_SERVO = 7 #15
+LOCK2_SERVO = 14
+OPEN_UP = 250  # Positions of servo
+CLOSE_UP = 530
+CLOSE_DOWN = 385
+PET_DOWN = 650
+AL_DOWN = 170
+LOCK1_CLOSE = 472
+LOCK1_OPEN = 410
+LOCK2_CLOSE = 340
+LOCK2_OPEN = 405
+
+RED = 8
+GREEN = 9
+BLUE = 10
+INNER = 13
+
+
+TRIG1 = 31
+ECHO1 = 29
+TRIG2 =33
+ECHO2 = 35
+
+TRIG3 = 16#for cheat_check
+ECHO3 = 18#for cheat_check
