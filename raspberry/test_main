@@ -49,21 +49,6 @@ GPIO.setup(ECHO3, GPIO.IN)
 
 WAIT_LIMIT = 8
 
-
-def check_rfid():
-    code = ''
-    while True:
-        #logging.info(UART.read().decode("utf-8"))
-        if UART.read() == b'\x02':
-            code = UART.read(12)
-            UART.flushInput()
-
-            break
-    code = code.decode("utf-8")
-    logging.info(code)
-    return code
-
-
 def open_up():
     pwm.set_pwm(UP_SERVO, 0, OPEN_UP)
 
@@ -113,19 +98,62 @@ def contents_type():
 
 def waiting():
     global CurGreen, CurBlue
-    for i in range(1000):
-        pwm.set_pwm(GREEN, 0, CurGreen)
-        pwm.set_pwm(BLUE, 0,  CurBlue)
-        CurGreen -= 2
-        CurBlue += 2
-        time.sleep(0.001)
+	while True:
+        for i in range(1000):
+            if UART.read() == b'\x02':
+                return
+			
+            pwm.set_pwm(GREEN, 0, CurGreen)
+            pwm.set_pwm(BLUE, 0,  CurBlue)
+            CurGreen -= 2
+            CurBlue += 2
+            time.sleep(0.001)
 
-    for i in range(1000):
-        pwm.set_pwm(GREEN, 0, CurGreen)
-        pwm.set_pwm(BLUE, 0, CurBlue)
-        CurGreen += 2
-        CurBlue -= 2
-        time.sleep(0.001)
+        for i in range(1000):
+            if UART.read() == b'\x02':
+                return
+            	
+            pwm.set_pwm(GREEN, 0, CurGreen)
+            pwm.set_pwm(BLUE, 0, CurBlue)
+            CurGreen += 2
+            CurBlue -= 2
+            time.sleep(0.001)
+
+def static_color(port):
+    global CurGreen, CurBlue, CurRed	
+    port -= 8
+
+    colors = [CurRed,CurGreen,CurBlue]
+    while colors[port] != 4000 or sum(colors) != 4000:
+        for i in range(3):
+            if i == port:
+                colors[i] = min(4000,colors[i] + 25)
+            else:
+                colors[i] = max(0,colors[i] - 25)
+            pwm.set_pwm(i + 8, 0, colors[i]))
+
+    CurRed = colors[0]
+    CurGreen = colors[1]
+    CurBlue = colors[2]
+
+def dynamic_color(port):
+    global CurGreen, CurBlue, CurRed
+    port -= 8
+
+    colors = [0,0,0]
+	colors[port] = 4000
+
+    while colors[0] != colors[1] != colors[2] != 2000:
+        for i in range(3):
+            if i == port:
+                colors[i] = max(2000,colors[i] - 25)
+            else:
+                colors[i] = min(2000,colors[i] + 25)
+            pwm.set_pwm(i + 8, 0, colors[i])]
+
+    CurRed = colors[0]
+    CurGreen = colors[1]
+    CurBlue = colors[2]
 
 
 def sonic_check(TRIG,ECHO):
@@ -203,15 +231,15 @@ try:
         # Correct
         close_up()
         close_down()
-
-        user = check_rfid()
-
-        if not(user):
-            continue
+        
+        waiting()
+        user = UART.read(12).decode('utf-8')
+        logging.info(user)
 
         beep()
 
         if user == "5605B8DF7642":
+            static_color(BLUE)
             open_lock()
             logging.info("The bin is opened for maintenance")
             reward(user, 'pet')
@@ -219,10 +247,12 @@ try:
                 time.sleep(5)
         reg_stat = 0
         try:
+            pass
+            static_color(GREEN)
             reg_stat = user_reg(user)
         except:
+            static_color(RED)
             time.sleep(1)
-            UART.flushInput()
         if reg_stat:
             logging.info("User found")
             # Correct
@@ -267,24 +297,31 @@ try:
                         time.sleep(2.5)
                         close_down()
                         try:
+                            pass
                             reward(user, 'pet')
                         except:
                             time.sleep(0.5)
                         logging.info('Rewarded for pet!')
+                        for i in range(5):
+                            dynamic_color(GREEN)
+
                     elif inner_type == 'al':
                         al_down()
                         time.sleep(2.5)
                         close_down()
                         try:
+                            pass
                             reward(user, 'al')
                         except:
                             time.sleep(0.5)
                         logging.info('Rewarded for al!')
-                    else:
-                        # Correct
+                        for i in range(5):
+                            dynamic_color(GREEN)
 
+                    else:
                         open_up()
                         while something_in():
+                            dynamic_color(RED)
                             time.sleep(0.01)
                         time.sleep(1)
                         close_up()
@@ -300,7 +337,6 @@ try:
 
         time.sleep(0.5)
         UART.flushInput()
-
 
 finally:
     GPIO.cleanup()
