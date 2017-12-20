@@ -1,10 +1,10 @@
 import RPi.GPIO as GPIO
 import time
-import urllib.request
+import urllib
 import picamera
 import logging
 import datetime
-import requests
+#import requests
 import Adafruit_PCA9685
 import serial
 
@@ -122,23 +122,7 @@ def make_photo():
     return image_path
 
 
-def upload_to_web(image_path):
-    url_api = 'http://217.71.231.9:48777/api/UploadFile4Recognition'
-    user_id = 'SmartBin'
-    image_type = 'garbage'
 
-    files = {
-        'file': ('image.jpg', open(image_path, 'rb'), 'image/jpg', {'Expires': '0'})
-    }
-    data = {
-        'user_id': user_id,
-        'filename': image_type
-    }
-    result = requests.put(url=url_api, files=files, data=data)
-    response = result.json()
-    recycle_type_id = response.get('Id', None)  # Recognized type id from OpenRecycle database
-    logging.info('Recognized: %s' % recycle_type_id)  # Db of all id's
-    return recycle_type_id  # https://github.com/openrecycle/open_data/blob/master/waste_db.csv
 
 
 def contents_type():
@@ -229,7 +213,7 @@ try:
             logging.info("The bin is opened for maintenance")
             while True:
                 time.sleep(5)
-
+        reg_stat = 0
         try:
             reg_stat = user_reg(user)
         except:
