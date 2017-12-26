@@ -1,8 +1,8 @@
 import socket
 
-def send(file):
+def get_class(file):
 
-    host = '127.0.0.1'
+    host = '192.168.0.133'
     port = 5000
 
     client = socket.socket()

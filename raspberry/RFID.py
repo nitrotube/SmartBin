@@ -20,5 +20,5 @@ while True:
         ID = ID.replace('\x03', '')
         print(ID)
 
-        time.sleep(1)
+        #time.sleep(1)
         UART.flushInput()

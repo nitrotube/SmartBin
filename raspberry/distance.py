@@ -32,7 +32,7 @@ def sonic_check():
     distance = distance - 0.5
     print(distance)
 
-    if (distance > 37) or (distance < 29):
+    if (distance > 42) or (distance < 38):
         here = True
     else:
         here = False
@@ -43,7 +43,8 @@ def something_in():
     really = True
     k = 0
     for i in range(30):
-        k += 1
+        if sonic_check():
+            k += 1
     if k < 5:
         really = False
     return really
