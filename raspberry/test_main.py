@@ -5,8 +5,9 @@ import picamera
 import logging
 import datetime
 import send
-import urllib
+import requests
 import os
+from multiprocessing import Process
 
 import Adafruit_PCA9685
 import serial
@@ -46,6 +47,13 @@ GPIO.setup(TRIG3, GPIO.OUT)
 GPIO.setup(ECHO3, GPIO.IN)
 
 WAIT_LIMIT = 8
+command = ''
+
+
+def fun():
+    os.system(command)
+
+p = Process(target=fun)
 
 def open_up():
     pwm.set_pwm(UP_SERVO, 0, OPEN_UP)
@@ -94,13 +102,14 @@ def contents_type():
     image = make_photo()
     return send.get_class(image)
 
-def waiting():
+
+def waiting():  # Dynamic color change while waiting
     global CurGreen, CurBlue,CurRed
     CurGreen = 4000
     CurRed = 0
     CurBlue = 2000
 
-    pwm.set_pwm(RED,0,CurRed)
+    pwm.set_pwm(RED, 0, CurRed)
     pwm.set_pwm(GREEN, 0, CurGreen)
 
     pwm.set_pwm(BLUE, 0, CurBlue)
@@ -110,28 +119,29 @@ def waiting():
             pwm.set_pwm(BLUE, 0,  CurBlue)
             CurGreen -= 2
             CurBlue += 2
-            if i % 100 == 0 and UART.read() == b'\x02':
-               return
+            if i % 30 == 0 and UART.read() == b'\x02':
+                return
 
         for i in range(1000):
             pwm.set_pwm(GREEN, 0, CurGreen)
             pwm.set_pwm(BLUE, 0, CurBlue)
             CurGreen += 2
             CurBlue -= 2
-            if i % 100 == 0 and UART.read() == b'\x02':
+            if i % 30 == 0 and UART.read() == b'\x02':
                 return
 
-def static_color(port):
+
+def static_color(port):  # Just displaying a color
     global CurGreen, CurBlue, CurRed	
     port -= 8
 
-    colors = [CurRed,CurGreen,CurBlue]
+    colors = [CurRed, CurGreen, CurBlue]
     while colors[port] != 4000 or sum(colors) != 4000:
         for i in range(3):
             if i == port:
-                colors[i] = min(4000,colors[i] + 25)
+                colors[i] = min(4000, colors[i] + 25)
             else:
-                colors[i] = max(0,colors[i] - 25)
+                colors[i] = max(0, colors[i] - 25)
             pwm.set_pwm(i + 8, 0, colors[i])
 
     CurRed = colors[0]
@@ -139,17 +149,17 @@ def static_color(port):
     CurBlue = colors[2]
 
 
-def dynamic_color(port):
+def dynamic_color(port):  # Basically blink
     global CurGreen, CurBlue, CurRed
     port -= 8
 
-    colors = [0,0,0]
+    colors = [0, 0, 0]
     colors[port] = 4000
     for i in range(3):
         pwm.set_pwm(i + 8, 0, colors[i])
 
     while colors[port] > 0:
-        colors[port] = max(0,colors[port] - 25)
+        colors[port] = max(0, colors[port] - 25)
         pwm.set_pwm(port + 8, 0, colors[port])
 
     while colors[port] < 4000:
@@ -161,7 +171,7 @@ def dynamic_color(port):
     CurBlue = colors[2]
 
 
-def sonic_check(TRIG,ECHO):
+def sonic_check(TRIG, ECHO):
     GPIO.output(TRIG, False)
     time.sleep(0.01)
     GPIO.output(TRIG, True)
@@ -178,7 +188,7 @@ def sonic_check(TRIG,ECHO):
     distance = pulse_duration * 17150
     distance = round(distance, 2) - 0.5
 
-    if (distance > 42) or (distance < 37):
+    if (distance > 45) or (distance < 35):
         return True
     return False
 
@@ -186,10 +196,10 @@ def sonic_check(TRIG,ECHO):
 def something_in():
     k = 0
     for i in range(30):
-        if sonic_check(TRIG1,ECHO1):
+        if sonic_check(TRIG1, ECHO1):
             k += 1
         time.sleep(0.0001)
-        if sonic_check(TRIG2,ECHO2):
+        if sonic_check(TRIG2, ECHO2):
             k += 1
     if k < 10:
         return False
@@ -199,7 +209,7 @@ def something_in():
 def cheat_check():
     k = 0
     for i in range(20):
-        if sonic_check(TRIG3,ECHO3):
+        if sonic_check(TRIG3, ECHO3):
             k += 1
     if k >= 5:
         return False
@@ -209,9 +219,9 @@ def cheat_check():
 def user_reg(user_id):
     user_url = 'http://smartbin35.ru.mastertest.ru/api/checkuser?cardCode=' + user_id
     logging.info(user_id)
-    response = urllib.request.urlopen(user_url)
-    logging.info(response.read())
-    user_status = response.read()
+    response = requests.get(user_url)
+    logging.info(response.text)
+    user_status = response.text
     if user_status == b'true':
         return True
     return False
@@ -220,7 +230,8 @@ def user_reg(user_id):
 def reward(user_id, trash_type):
     reward_url = 'http://smartbin35.ru.mastertest.ru/api/bonus?cardCode=' + user_id
     reward_url = reward_url + '&trashType=' + trash_type + '&trashId=2'
-    urllib.request.urlopen(reward_url)
+    response = requests.get(reward_url)
+    return response
 
 
 def beep():
@@ -232,36 +243,31 @@ try:
     time.sleep(1)
     close_lock()
     logging.info("Process started")
+    close_up()
+    close_down()
+    close_lock()
     while True:
-        # Correct
-        close_up()
-        close_down()
-        close_lock()
-        
         waiting()
         user = UART.read(12).decode('utf-8')
         logging.info(user)
 
         beep()
 
-        if user == "5605B8DF7642":
+        if user == "5605B8DF7642":  # Maintenance stuff
             open_lock()
             static_color(RED)
             logging.info("The bin is opened for maintenance")
             #reward(user, 'pet')
             while True:
                 time.sleep(5)
-        reg_stat = True
         try:
-            pass
-            static_color(GREEN)
-            #reg_stat = user_reg(user)
+            reg_stat = user_reg(user)
         except:
             static_color(RED)
             time.sleep(1)
         if reg_stat:
+            static_color(GREEN)
             logging.info("User found")
-            # Correct
             entry_time = time.time()
             time_exit = False
 
@@ -273,34 +279,34 @@ try:
                     current_time = time.time()
                     if current_time - entry_time > WAIT_LIMIT:
                         time_exit = True
-                    if something_in() and cheat_check():
+                    if something_in():
                         find_exit = True
 
+                while not(cheat_check()):
+                    time.sleep(0.1)
                 close_up()
-                time.sleep(0.5)
+                time.sleep(1)
                 if not find_exit:
                     continue
 
                 if something_in():
-                    time.sleep(0.7)
                     logging.info("Something in")
                     inner_type = ""
                     try:
                         inner_type = contents_type()
                     except:
-                        time.sleep(5)
-                        time_exit = True
+                        static_color(RED)
+                        while True:
+                            time.sleep(1)
 
-                    entry_time = time.time()
-                    find_exit = False
                     if inner_type == 'pet':
-                        os.system('mplayer /home/pi/pywork/sounds/ilovetrash.mp3 -af volume=15')
+                        command = 'mplayer /home/pi/pywork/sounds/plastic.mp3 -af volume=7'
+                        p.start()
                         pet_down()
                         time.sleep(2.5)
                         close_down()
                         try:
-                            pass
-                            #reward(user, 'pet')
+                            reward(user, 'pet')
                         except:
                             time.sleep(0.5)
                         logging.info('Rewarded for pet!')
@@ -308,13 +314,13 @@ try:
                             dynamic_color(GREEN)
 
                     elif inner_type == 'al':
-                        os.system('mplayer /home/pi/pywork/sounds/ilovetrash.mp3 -af volume=15')
+                        command = 'mplayer /home/pi/pywork/sounds/al.mp3 -af volume=7'
+                        p.start()
                         al_down()
                         time.sleep(2.5)
                         close_down()
                         try:
-                            pass
-                            #reward(user, 'al')
+                            reward(user, 'al')
                         except:
                             time.sleep(0.5)
                         logging.info('Rewarded for al!')
@@ -323,19 +329,24 @@ try:
 
                     else:
                         open_up()
+                        command = 'mplayer /home/pi/pywork/sounds/unknown.mp3 -af volume=7'
+                        p.start()
                         while something_in():
                             for i in range(2):
                                 dynamic_color(RED)
                         close_up()
                         time_exit = True
+
+                    entry_time = time.time()
+                    find_exit = False
                 else:
                     entry_time = time.time()
-                    # Correct
+                    dynamic_color(RED)
+
             logging.info("Session closed")
             logging.info('****************************')
         else:
-            pass
-            # Correct
+            dynamic_color(RED)
 
         time.sleep(0.5)
         UART.flushInput()
