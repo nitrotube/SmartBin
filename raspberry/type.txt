@@ -1,3 +1,0 @@
-trash (score = 0.99870)
-al (score = 0.00089)
-pet (score = 0.00041)
