@@ -20,10 +20,10 @@ BLUE = 10
 INNER = 13
 
 
-TRIG1 = 31
+TRIG1 = 31  # Bottle check
 ECHO1 = 29
 TRIG2 =33
 ECHO2 = 35
 
-TRIG3 = 16#for cheat_check
-ECHO3 = 18#for cheat_check
+TRIG3 = 16  # Cheat_check
+ECHO3 = 18 
