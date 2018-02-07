@@ -46,7 +46,7 @@ GPIO.setup(ECHO2, GPIO.IN)
 GPIO.setup(TRIG3, GPIO.OUT)
 GPIO.setup(ECHO3, GPIO.IN)
 
-WAIT_LIMIT = 8
+WAIT_LIMIT = 6
 command = ''
 
 
@@ -59,6 +59,7 @@ def open_up():
         pwm.set_pwm(UP_SERVO, 0, OPEN_UP)
     except:
         time.sleep(0.5)
+        pwm.set_pwm(UP_SERVO, 0, OPEN_UP)
 
 
 def close_up():
@@ -66,6 +67,7 @@ def close_up():
         pwm.set_pwm(UP_SERVO, 0, CLOSE_UP)
     except:
         time.sleep(0.5)
+        pwm.set_pwm(UP_SERVO, 0, CLOSE_UP)
 
 
 def close_down():
@@ -73,10 +75,15 @@ def close_down():
         pwm.set_pwm(DOWN_SERVO, 0, CLOSE_DOWN)
     except:
         time.sleep(0.5)
+        pwm.set_pwm(DOWN_SERVO, 0, CLOSE_DOWN)
 
 
 def pet_down():
-    pwm.set_pwm(DOWN_SERVO, 0, PET_DOWN)
+    try:
+        pwm.set_pwm(DOWN_SERVO, 0, PET_DOWN)
+    except:
+        time.sleep(0.5)
+        pwm.set_pwm(DOWN_SERVO, 0, PET_DOWN)
 
 
 def al_down():
@@ -84,6 +91,7 @@ def al_down():
         pwm.set_pwm(DOWN_SERVO, 0, AL_DOWN)
     except:
         time.sleep(0.5)
+        pwm.set_pwm(DOWN_SERVO, 0, AL_DOWN)
 
 
 def close_lock():
@@ -92,6 +100,8 @@ def close_lock():
         pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_CLOSE)
     except:
         time.sleep(0.5)
+        pwm.set_pwm(LOCK1_SERVO, 0, LOCK1_CLOSE)
+        pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_CLOSE)
 
 
 def open_lock():
@@ -100,6 +110,8 @@ def open_lock():
         pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_OPEN)
     except:
         time.sleep(0.5)
+        pwm.set_pwm(LOCK1_SERVO, 0, LOCK1_OPEN)
+        pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_OPEN)
 
 
 def make_photo():
@@ -108,10 +120,10 @@ def make_photo():
     image_time = str(image_time)[:19].replace(' ', '').replace('-', '').replace(':', '')
     image_path = '/home/pi/Documents/Photos/' + image_time + '.jpeg'
     camera.resolution = (640, 480)
-    camera.brightness = 65
+    camera.brightness = 60
     camera.contrast = 55
     camera.capture(image_path, use_video_port=True)
-    #GPIO.output(INNER, 0)
+    GPIO.output(INNER, 0)
     return image_path
 
 
@@ -147,7 +159,6 @@ def waiting():  # Dynamic color change while waiting
                 pwm.set_pwm(BLUE, 0, CurBlue)
             CurGreen -= 16
             CurBlue += 16
-            time.sleep(0.01)
             if i % 10 == 0 and UART.read() == b'\x02':
                 return
 
@@ -161,14 +172,13 @@ def waiting():  # Dynamic color change while waiting
                 pwm.set_pwm(BLUE, 0, CurBlue)
             CurGreen += 16
             CurBlue -= 16
-            time.sleep(0.01)
             if i % 10 == 0 and UART.read() == b'\x02':
                 return
 
 
 def static_color(port):  # Just displaying a color
-    global CurGreen, CurBlue, CurRed	
-    port -= 8
+    global CurGreen, CurBlue, CurRed
+    port -= 5
 
     colors = [CurRed, CurGreen, CurBlue]
     while colors[port] != 4000 or sum(colors) != 4000:
@@ -178,10 +188,10 @@ def static_color(port):  # Just displaying a color
             else:
                 colors[i] = max(0, colors[i] - 25)
             try:
-                pwm.set_pwm(i + 8, 0, colors[i])
+                pwm.set_pwm(i + 5, 0, colors[i])
             except:
                 time.sleep(0.3)
-                pwm.set_pwm(i + 8, 0, colors[i])
+                pwm.set_pwm(i + 5, 0, colors[i])
 
     CurRed = colors[0]
     CurGreen = colors[1]
@@ -190,36 +200,37 @@ def static_color(port):  # Just displaying a color
 
 def dynamic_color(port):  # Basically blink
     global CurGreen, CurBlue, CurRed
-    port -= 8
+    port -= 5
 
     colors = [0, 0, 0]
     colors[port] = 4000
     for i in range(3):
         try:
-            pwm.set_pwm(i + 8, 0, colors[i])
+            pwm.set_pwm(i + 5, 0, colors[i])
         except:
             time.sleep(0.3)
-            pwm.set_pwm(i + 8, 0, colors[i])
+            pwm.set_pwm(i + 5, 0, colors[i])
 
     while colors[port] > 0:
         colors[port] = max(0, colors[port] - 25)
         try:
-            pwm.set_pwm(port + 8, 0, colors[port])
+            pwm.set_pwm(port + 5, 0, colors[port])
         except:
             time.sleep(0.3)
-            pwm.set_pwm(port + 8, 0, colors[port])
+            pwm.set_pwm(port + 5, 0, colors[port])
 
     while colors[port] < 4000:
         colors[port] = min(4000, colors[port] + 25)
         try:
-            pwm.set_pwm(port + 8, 0, colors[port])
+            pwm.set_pwm(port + 5, 0, colors[port])
         except:
             time.sleep(0.3)
-            pwm.set_pwm(port + 8, 0, colors[port])
+            pwm.set_pwm(port + 5, 0, colors[port])
 
     CurRed = colors[0]
     CurGreen = colors[1]
     CurBlue = colors[2]
+
 
 
 def sonic_check(TRIG, ECHO):
@@ -239,7 +250,7 @@ def sonic_check(TRIG, ECHO):
     distance = pulse_duration * 17150
     distance = round(distance, 2) - 0.5
 
-    if (distance > 45) or (distance < 35):
+    if (distance > 42) or (distance < 38):
         return True
     return False
 
@@ -249,21 +260,22 @@ def something_in():
     for i in range(30):
         if sonic_check(TRIG1, ECHO1):
             k += 1
-        time.sleep(0.0001)
+        time.sleep(0.005)
         if sonic_check(TRIG2, ECHO2):
             k += 1
-    if k < 10:
+    if k < 5:
         return False
     return True
 
 
 def cheat_check():
+    time.sleep(0.1)
     k = 0
-    for i in range(50):
+    for i in range(30):
         if sonic_check(TRIG3, ECHO3):
             k += 1
-            time.sleep(0.01)
-    if k >= 1:
+            time.sleep(0.001)
+    if k >= 3:
         return False
     return True
 
@@ -299,13 +311,13 @@ try:
     close_down()
     close_lock()
     while True:
+        GPIO.output(INNER, 0)
         waiting()
         user = UART.read(12).decode('utf-8')
         logging.info(user)
-
         beep()
 
-        if user == "5605B8DF764":  # Maintenance stuff
+        if user == "5605B8DF7642":  # Maintenance stuff
             open_lock()
             user = ""
             static_color(RED)
@@ -319,6 +331,7 @@ try:
                     if userok == "5605B8DF7642":
                         beep()
                         logging.info("The bin is normal mode")
+                        close_lock()
                         break
         try:
             reg_stat = user_reg(user)
@@ -326,12 +339,12 @@ try:
             static_color(RED)
             time.sleep(1)
         if reg_stat:
-            static_color(GREEN)
             logging.info("User found")
             entry_time = time.time()
             time_exit = False
 
             while not time_exit:
+                static_color(GREEN)
                 find_exit = False
                 open_up()
                 GPIO.output(INNER, 1)
