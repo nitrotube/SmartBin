@@ -55,15 +55,24 @@ def fun():
 
 
 def open_up():
-    pwm.set_pwm(UP_SERVO, 0, OPEN_UP)
+    try:
+        pwm.set_pwm(UP_SERVO, 0, OPEN_UP)
+    except:
+        time.sleep(0.5)
 
 
 def close_up():
-    pwm.set_pwm(UP_SERVO, 0, CLOSE_UP)
+    try:
+        pwm.set_pwm(UP_SERVO, 0, CLOSE_UP)
+    except:
+        time.sleep(0.5)
 
 
 def close_down():
-    pwm.set_pwm(DOWN_SERVO, 0, CLOSE_DOWN)
+    try:
+        pwm.set_pwm(DOWN_SERVO, 0, CLOSE_DOWN)
+    except:
+        time.sleep(0.5)
 
 
 def pet_down():
@@ -71,28 +80,38 @@ def pet_down():
 
 
 def al_down():
-    pwm.set_pwm(DOWN_SERVO, 0, AL_DOWN)
+    try:
+        pwm.set_pwm(DOWN_SERVO, 0, AL_DOWN)
+    except:
+        time.sleep(0.5)
 
 
 def close_lock():
-    pwm.set_pwm(LOCK1_SERVO, 0, LOCK1_CLOSE)
-    pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_CLOSE)
+    try:
+        pwm.set_pwm(LOCK1_SERVO, 0, LOCK1_CLOSE)
+        pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_CLOSE)
+    except:
+        time.sleep(0.5)
 
 
 def open_lock():
-    pwm.set_pwm(LOCK1_SERVO, 0, LOCK1_OPEN)
-    pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_OPEN)
+    try:
+        pwm.set_pwm(LOCK1_SERVO, 0, LOCK1_OPEN)
+        pwm.set_pwm(LOCK2_SERVO, 0, LOCK2_OPEN)
+    except:
+        time.sleep(0.5)
 
 
 def make_photo():
+    GPIO.output(INNER, 1)
     image_time = datetime.datetime.now()  # Making a unique name of a string from datetime
     image_time = str(image_time)[:19].replace(' ', '').replace('-', '').replace(':', '')
     image_path = '/home/pi/Documents/Photos/' + image_time + '.jpeg'
     camera.resolution = (640, 480)
-    camera.brightness = 35
-    camera.contrast = 50
+    camera.brightness = 65
+    camera.contrast = 55
     camera.capture(image_path, use_video_port=True)
-    GPIO.output(INNER, 0)
+    #GPIO.output(INNER, 0)
     return image_path
 
 
@@ -112,36 +131,38 @@ def waiting():  # Dynamic color change while waiting
         pwm.set_pwm(GREEN, 0, CurGreen)
         pwm.set_pwm(BLUE, 0, CurBlue)
     except:
-        time.sleep(0.1)
+        time.sleep(0.3)
         pwm.set_pwm(RED, 0, CurRed)
         pwm.set_pwm(GREEN, 0, CurGreen)
         pwm.set_pwm(BLUE, 0, CurBlue)
 
     while True:
-        for i in range(250):
+        for i in range(125):
             try:
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0,  CurBlue)
             except:
-                time.sleep(0.1)
+                time.sleep(0.3)
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0, CurBlue)
-            CurGreen -= 8
-            CurBlue += 8
-            if i % 30 == 0 and UART.read() == b'\x02':
+            CurGreen -= 16
+            CurBlue += 16
+            time.sleep(0.01)
+            if i % 10 == 0 and UART.read() == b'\x02':
                 return
 
-        for i in range(250):
+        for i in range(125):
             try:
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0, CurBlue)
             except:
-                time.sleep(0.1)
+                time.sleep(0.3)
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0, CurBlue)
-            CurGreen += 8
-            CurBlue -= 8
-            if i % 30 == 0 and UART.read() == b'\x02':
+            CurGreen += 16
+            CurBlue -= 16
+            time.sleep(0.01)
+            if i % 10 == 0 and UART.read() == b'\x02':
                 return
 
 
@@ -159,7 +180,7 @@ def static_color(port):  # Just displaying a color
             try:
                 pwm.set_pwm(i + 8, 0, colors[i])
             except:
-                time.sleep(0.1)
+                time.sleep(0.3)
                 pwm.set_pwm(i + 8, 0, colors[i])
 
     CurRed = colors[0]
@@ -177,7 +198,7 @@ def dynamic_color(port):  # Basically blink
         try:
             pwm.set_pwm(i + 8, 0, colors[i])
         except:
-            time.sleep(0.1)
+            time.sleep(0.3)
             pwm.set_pwm(i + 8, 0, colors[i])
 
     while colors[port] > 0:
@@ -185,7 +206,7 @@ def dynamic_color(port):  # Basically blink
         try:
             pwm.set_pwm(port + 8, 0, colors[port])
         except:
-            time.sleep(0.1)
+            time.sleep(0.3)
             pwm.set_pwm(port + 8, 0, colors[port])
 
     while colors[port] < 4000:
@@ -193,7 +214,7 @@ def dynamic_color(port):  # Basically blink
         try:
             pwm.set_pwm(port + 8, 0, colors[port])
         except:
-            time.sleep(0.1)
+            time.sleep(0.3)
             pwm.set_pwm(port + 8, 0, colors[port])
 
     CurRed = colors[0]
@@ -315,7 +336,7 @@ try:
                 open_up()
                 GPIO.output(INNER, 1)
                 while (not find_exit) and (not time_exit):
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     current_time = time.time()
                     if current_time - entry_time > WAIT_LIMIT:
                         time_exit = True
@@ -336,9 +357,16 @@ try:
                     try:
                         inner_type = contents_type()
                     except:
+                        logging.info("Connection to server failed")
                         static_color(RED)
                         while True:
-                            time.sleep(1)
+                            time.sleep(0.2)
+                            if UART.read() == b'\x02':
+                                userok = UART.read(12).decode('utf-8')
+                                if userok == "5605B8DF7642":
+                                    beep()
+                                    logging.info("The bin is normal mode")
+                                    break
 
                     if inner_type == 'pet':
                         command = 'mplayer /home/pi/pywork/sounds/plastic.mp3 -af volume=7'
