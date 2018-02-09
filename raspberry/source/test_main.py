@@ -7,6 +7,7 @@ import datetime
 import send
 import requests
 import os
+import random
 from multiprocessing import Process
 
 import Adafruit_PCA9685
@@ -48,6 +49,8 @@ GPIO.setup(ECHO3, GPIO.IN)
 
 WAIT_LIMIT = 6
 command = ''
+
+random.seed()
 
 
 def fun():
@@ -342,6 +345,7 @@ try:
             logging.info("User found")
             entry_time = time.time()
             time_exit = False
+            point_sum = 0
 
             while not time_exit:
                 static_color(GREEN)
@@ -382,6 +386,7 @@ try:
                                     break
 
                     if inner_type == 'pet':
+                        point_sum += 16
                         command = 'mplayer /home/pi/pywork/sounds/plastic.mp3 -af volume=7'
                         p = Process(target=fun)
                         p.start()
@@ -398,6 +403,7 @@ try:
                             dynamic_color(GREEN)
 
                     elif inner_type == 'al':
+                        point_sum += 10
                         p = Process(target=fun)
                         command = 'mplayer /home/pi/pywork/sounds/al.mp3 -af volume=7'
                         p.start()
@@ -432,6 +438,18 @@ try:
                 else:
                     entry_time = time.time()
                     dynamic_color(RED)
+
+            if point_sum > 0:
+                time.sleep(2)
+                p = Process(target=fun)
+                if point_sum <= 29 :
+                    command = 'mplayer /home/pi/pywork/sounds/' + str(point_sum) + '.mp3 -af volume=7'
+                else:
+                    choice = random.randint(1,6)
+                    command = 'mplayer /home/pi/pywork/sounds/alot' + str(choice) + '.mp3 -af volume=7'
+                p.start()
+                time.sleep(2)
+                p.terminate()
 
             logging.info("Session closed")
             logging.info('****************************')
