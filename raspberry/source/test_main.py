@@ -5,6 +5,7 @@ import picamera
 import logging
 import datetime
 import send
+import warn_full
 import requests
 import os
 import random
@@ -12,6 +13,7 @@ from multiprocessing import Process
 
 import Adafruit_PCA9685
 import serial
+
 
 GPIO.setmode(GPIO.BOARD)
 
@@ -51,6 +53,9 @@ WAIT_LIMIT = 6
 command = ''
 
 random.seed()
+
+AL_LIMIT = 50
+PET_LIMIT = 25
 
 
 def fun():
@@ -306,6 +311,48 @@ def beep():
     time.sleep(0.3)
     GPIO.output(BEEPER, 0)
 
+
+def count_fullness(type):
+    if type == 'al':
+        fal = open('fullnessal.txt')
+        nal = int(fal.read())
+        fal.close()
+        fal = open('fullnessal.txt', 'w')
+        fal.write(str(nal+1))
+        fal.close()
+    else:
+        fpet = open('fullnesspet.txt')
+        npet = int(fpet.read())
+        fpet.close()
+        fpet = open('fullnesspet.txt', 'w')
+        fpet.write(str(npet+1))
+        fpet.close()
+
+
+def fullness_check():
+    fal = open('fullnessal.txt')
+    fpet = open('fullnesspet.txt')
+    nal = fal.read()
+    npet = fpet.read()
+
+    if (int(nal) > AL_LIMIT) or (int(npet) > PET_LIMIT):
+        static_color(RED)
+        if int(nal) > AL_LIMIT:
+            logging.info("The bin is full (al)")
+            warn_full.send_warn_full('al')
+        else:
+            logging.info("The bin is full (pet)")
+            warn_full.send_warn_full('pet')
+        fal.close()
+        fpet.close()
+        time.sleep(2)
+        UART.flushInput()
+        while True:
+            time.sleep(0.2)
+            if UART.read() == b'\x02':
+                break
+
+
 try:
     time.sleep(1)
     close_lock()
@@ -315,6 +362,7 @@ try:
     close_lock()
     while True:
         GPIO.output(INNER, 0)
+        fullness_check()
         waiting()
         user = UART.read(12).decode('utf-8')
         logging.info(user)
@@ -394,6 +442,7 @@ try:
                         time.sleep(2.5)
                         close_down()
                         p.terminate()
+                        count_fullness('pet')
                         try:
                             reward(user, 'pet')
                         except:
@@ -410,6 +459,8 @@ try:
                         al_down()
                         time.sleep(2.5)
                         close_down()
+                        p.terminate()
+                        count_fullness('al')
                         try:
                             reward(user, 'al')
                         except:
