@@ -14,7 +14,6 @@ from multiprocessing import Process
 import Adafruit_PCA9685
 import serial
 
-
 GPIO.setmode(GPIO.BOARD)
 
 GPIO.setup(BEEPER, GPIO.OUT)
@@ -22,7 +21,7 @@ GPIO.output(BEEPER, 0)
 
 
 camera = picamera.PiCamera()
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)  # Setting up logging
+logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.txt', level=logging.INFO)  # Setting up logging
 
 UART = serial.Serial(
     port='/dev/serial0',
@@ -55,7 +54,11 @@ command = ''
 random.seed()
 
 AL_LIMIT = 50
-PET_LIMIT = 25
+PET_LIMIT = 15
+
+CurRed = 0
+CurGreen = 0
+CurBlue = 0
 
 
 def fun():
@@ -145,6 +148,8 @@ def waiting():  # Dynamic color change while waiting
     CurGreen = 4000
     CurRed = 0
     CurBlue = 2000
+
+    fullness_check()
 
     try:
         pwm.set_pwm(RED, 0, CurRed)
@@ -330,27 +335,38 @@ def count_fullness(type):
 
 
 def fullness_check():
-    fal = open('fullnessal.txt')
-    fpet = open('fullnesspet.txt')
+    fal = open('/home/pi/pywork/fullnessal.txt')
+    fpet = open('/home/pi/pywork/fullnesspet.txt')
     nal = fal.read()
     npet = fpet.read()
+    fal.close()
+    fpet.close()
 
     if (int(nal) > AL_LIMIT) or (int(npet) > PET_LIMIT):
         static_color(RED)
         if int(nal) > AL_LIMIT:
             logging.info("The bin is full (al)")
             warn_full.send_warn_full('al')
+            fal = open('/home/pi/pywork/fullnessal.txt', 'w')
+            fal.write('0')
+            fal.close()
         else:
             logging.info("The bin is full (pet)")
             warn_full.send_warn_full('pet')
-        fal.close()
-        fpet.close()
+            fpet = open('/home/pi/pywork/fullnesspet.txt', 'w')
+            fpet.write('0')
+            fpet.close()
+
         time.sleep(2)
         UART.flushInput()
         while True:
             time.sleep(0.2)
             if UART.read() == b'\x02':
-                break
+                userok = UART.read(12).decode('utf-8')
+                if userok == "5605B8DF7642":
+                    return
+    else:
+        return
 
 
 try:
@@ -362,7 +378,6 @@ try:
     close_lock()
     while True:
         GPIO.output(INNER, 0)
-        fullness_check()
         waiting()
         user = UART.read(12).decode('utf-8')
         logging.info(user)
@@ -491,7 +506,7 @@ try:
                     dynamic_color(RED)
 
             if point_sum > 0:
-                time.sleep(2)
+                time.sleep(1.5)
                 p = Process(target=fun)
                 if point_sum <= 29 :
                     command = 'mplayer /home/pi/pywork/sounds/' + str(point_sum) + '.mp3 -af volume=7'
