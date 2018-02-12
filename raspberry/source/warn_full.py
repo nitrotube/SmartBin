@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 
 def send_warn_full(type):
     server_addr  = 'smtp.timeweb.ru'
-    port = 25
+    port = 2525
     pi_login = 'warning@smartbin.ru'
     pi_pass = 'warning12'
     to = 'e.spirin@smartbin.ru'
