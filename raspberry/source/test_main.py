@@ -6,6 +6,7 @@ import logging
 import datetime
 import send
 import warn_full
+import schedule
 import requests
 import os
 import random
@@ -406,6 +407,12 @@ try:
             time.sleep(1)
         if reg_stat:
             logging.info("User found")
+            
+            if schedule.check_silence():
+                os.system('amixer set PCM -- 0%')
+            else:
+                os.system('amixer set PCM -- 100%')
+                
             entry_time = time.time()
             time_exit = False
             point_sum = 0
