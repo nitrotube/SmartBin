@@ -5,8 +5,6 @@ import picamera
 import logging
 import datetime
 import send
-import warn_full
-import schedule
 import requests
 import os
 import random
@@ -22,7 +20,7 @@ GPIO.output(BEEPER, 0)
 
 
 camera = picamera.PiCamera()
-logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.txt', level=logging.INFO)  # Setting up logging
+logging.basicConfig(filename='/home/pi/pywork/log.txt', level=logging.INFO)  # Setting up logging
 
 UART = serial.Serial(
     port='/dev/serial0',
@@ -53,13 +51,6 @@ WAIT_LIMIT = 6
 command = ''
 
 random.seed()
-
-AL_LIMIT = 50
-PET_LIMIT = 15
-
-CurRed = 0
-CurGreen = 0
-CurBlue = 0
 
 
 def fun():
@@ -149,8 +140,6 @@ def waiting():  # Dynamic color change while waiting
     CurGreen = 4000
     CurRed = 0
     CurBlue = 2000
-
-    fullness_check()
 
     try:
         pwm.set_pwm(RED, 0, CurRed)
@@ -317,59 +306,6 @@ def beep():
     time.sleep(0.3)
     GPIO.output(BEEPER, 0)
 
-
-def count_fullness(type):
-    if type == 'al':
-        fal = open('fullnessal.txt')
-        nal = int(fal.read())
-        fal.close()
-        fal = open('fullnessal.txt', 'w')
-        fal.write(str(nal+1))
-        fal.close()
-    else:
-        fpet = open('fullnesspet.txt')
-        npet = int(fpet.read())
-        fpet.close()
-        fpet = open('fullnesspet.txt', 'w')
-        fpet.write(str(npet+1))
-        fpet.close()
-
-
-def fullness_check():
-    fal = open('/home/pi/pywork/fullnessal.txt')
-    fpet = open('/home/pi/pywork/fullnesspet.txt')
-    nal = fal.read()
-    npet = fpet.read()
-    fal.close()
-    fpet.close()
-
-    if (int(nal) > AL_LIMIT) or (int(npet) > PET_LIMIT):
-        static_color(RED)
-        if int(nal) > AL_LIMIT:
-            logging.info("The bin is full (al)")
-            warn_full.send_warn_full('al')
-            fal = open('/home/pi/pywork/fullnessal.txt', 'w')
-            fal.write('0')
-            fal.close()
-        else:
-            logging.info("The bin is full (pet)")
-            warn_full.send_warn_full('pet')
-            fpet = open('/home/pi/pywork/fullnesspet.txt', 'w')
-            fpet.write('0')
-            fpet.close()
-
-        time.sleep(2)
-        UART.flushInput()
-        while True:
-            time.sleep(0.2)
-            if UART.read() == b'\x02':
-                userok = UART.read(12).decode('utf-8')
-                if userok == "5605B8DF7642":
-                    return
-    else:
-        return
-
-
 try:
     time.sleep(1)
     close_lock()
@@ -384,7 +320,7 @@ try:
         logging.info(user)
         beep()
 
-        if user == "5605B8DF7642":  # Maintenance stuff
+        if user == "5605B8DF7642" :  # Maintenance stuff
             open_lock()
             user = ""
             static_color(RED)
@@ -400,19 +336,11 @@ try:
                         logging.info("The bin is normal mode")
                         close_lock()
                         break
-        try:
-            reg_stat = user_reg(user)
-        except:
-            static_color(RED)
-            time.sleep(1)
+
+        reg_stat = user_reg(user)
+
         if reg_stat:
             logging.info("User found")
-            
-            if schedule.check_silence():
-                os.system('amixer set PCM -- 0%')
-            else:
-                os.system('amixer set PCM -- 100%')
-                
             entry_time = time.time()
             time_exit = False
             point_sum = 0
@@ -434,27 +362,13 @@ try:
                 while not(cheat_check()):
                     beep()
                 close_up()
-                time.sleep(0.5)
+                time.sleep(1)
                 if not find_exit:
                     continue
 
                 if something_in():
                     logging.info("Something in")
-                    inner_type = ""
-                    try:
-                        inner_type = contents_type()
-                    except:
-                        logging.info("Connection to server failed")
-                        static_color(RED)
-                        while True:
-                            time.sleep(0.2)
-                            if UART.read() == b'\x02':
-                                userok = UART.read(12).decode('utf-8')
-                                if userok == "5605B8DF7642":
-                                    beep()
-                                    logging.info("The bin is normal mode")
-                                    break
-
+                    inner_type = contents_type()
                     if inner_type == 'pet':
                         point_sum += 16
                         command = 'mplayer /home/pi/pywork/sounds/plastic.mp3 -af volume=7'
@@ -464,11 +378,7 @@ try:
                         time.sleep(2.5)
                         close_down()
                         p.terminate()
-                        count_fullness('pet')
-                        try:
-                            reward(user, 'pet')
-                        except:
-                            time.sleep(0.5)
+                        reward(user, 'pet')
                         logging.info('Rewarded for pet!')
                         for i in range(2):
                             dynamic_color(GREEN)
@@ -481,17 +391,14 @@ try:
                         al_down()
                         time.sleep(2.5)
                         close_down()
-                        p.terminate()
-                        count_fullness('al')
-                        try:
-                            reward(user, 'al')
-                        except:
-                            time.sleep(0.5)
+                        reward(user, 'al')
                         logging.info('Rewarded for al!')
                         for i in range(2):
                             dynamic_color(GREEN)
 
                     else:
+                        for i in range(2):
+                            dynamic_color(RED)
                         open_up()
                         p = Process(target=fun)
                         command = 'mplayer /home/pi/pywork/sounds/unknown.mp3 -af volume=7'
@@ -513,7 +420,7 @@ try:
                     dynamic_color(RED)
 
             if point_sum > 0:
-                time.sleep(1.5)
+                time.sleep(1)
                 p = Process(target=fun)
                 if point_sum <= 29 :
                     command = 'mplayer /home/pi/pywork/sounds/' + str(point_sum) + '.mp3 -af volume=7'
@@ -531,7 +438,11 @@ try:
 
         time.sleep(0.5)
         UART.flushInput()
-
+except:
+    static_color(RED)
+    close_down()
+    close_up()
+    close_lock()
 finally:
     GPIO.cleanup()
     camera.close()
