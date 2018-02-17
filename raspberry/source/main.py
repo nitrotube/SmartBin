@@ -10,7 +10,7 @@ def main():
 			session = Session(c, c.scaner.readCode())
 			session.run()
 			session = 0
-	
+
 	GPIO.cleanup()
 
 if(__name__=="__main__"):

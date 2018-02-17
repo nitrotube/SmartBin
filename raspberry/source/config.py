@@ -34,7 +34,7 @@ ECHO3 = 18
 WAIT_LIMIT = 6
 
 ADMINS = [
-	"17800807D0782",
+	"7800807D0782",
 ]
 
 UNKNOWN = 0
@@ -42,8 +42,15 @@ PLASTIC = 1
 ALUMINIUM = 2
 
 PATH = {
-    "BASE_DIR" : "/home/pi/pywork/",
-    "SerialPort": "/dev/serial0"
+	"BASE_DIR" : "/home/pi/pywork/",
+	"SerialPort": "/dev/serial0",
+	"PHOTOS" : "/home/pi/pywork/resorces/photos/",
+}
+
+SOUND = {
+	"PLASTIC" : PATH["BASE_DIR"] + "resources/sounds/plastic.mp3",
+	"ALUMINIUM" : PATH["BASE_DIR"] + "resources/sounds/aluminium.mp3",
+	"UNKNOWN" : PATH["BASE_DIR"] + "resources/sounds/unknown.mp3",
 }
 
 EMAIL = {

@@ -1,26 +1,26 @@
 
 import RPi.GPIO as GPIO
 import time
-import config
+import config as cfg
 
 GPIO.setmode(GPIO.BOARD)
 
 class Sensor:
-	
+
 	def __init__(self, trig, echo):
 		self.trig = trig
 		self.echo = echo
 		GPIO.setup(trig, GPIO.OUT)
 		GPIO.setup(echo, GPIO.IN)
-		
+
 	def getDistance(self):
-	
+
 		GPIO.output(self.trig, False)
 		time.sleep(0.01)
 		GPIO.output(self.trig, True)
 		time.sleep(0.00001)
 		GPIO.output(self.trig, False)
-		
+
 		while GPIO.input(self.echo) == 0:
 			pulse_start = time.time()
 
@@ -31,7 +31,7 @@ class Sensor:
 		dist = pulse_duration * 17150
 		dist = round(dist, 2) - 0.5
 		return dist
-	
+
 	def found(self):
 		dist = self.getDistance()
 		if (dist > 42) or (dist < 38):
@@ -48,10 +48,10 @@ class Sensor:
 		if k >= 3:
 			return False
 		return True
-	
-		
+
+
 def test():
-	sensor = Sensor(config.TRIG2, config.ECHO2)
+	sensor = Sensor(cfg.TRIG2, cfg.ECHO2)
 	while 1:
 		time.sleep(0.5)
 		print("distance:")

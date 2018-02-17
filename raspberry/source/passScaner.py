@@ -11,7 +11,7 @@ class PassScaner:
 			timeout=1
 		)
 		self.CODE = ""
-	
+
 	def readCode(self):
 		if(self.CODE == ""):
 			if(self.UART.read() == b'\x02'):
@@ -24,7 +24,7 @@ class PassScaner:
 		res = self.CODE
 		self.CODE = ""
 		return res
-		
+
 	def hasCode(self):
 		if(self.CODE == ""):
 			self.readCode()

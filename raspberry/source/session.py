@@ -8,7 +8,7 @@ class Session():
 	def __init__(self, container, user):
 		self.container = container
 		self.user = user
-	
+
 	def getClass(self, path):
 
 		host = '192.168.0.133'
@@ -28,9 +28,7 @@ class Session():
 
 	def foundUser(self):
 		user_url = 'http://smartbin35.ru.mastertest.ru/api/checkuser?cardCode=' + self.user
-		#logging.info(self.user)
 		response = requests.get(user_url)
-		#logging.info(response.text)
 		user_status = response.text
 		if user_status == b'true':
 			return True
@@ -43,12 +41,12 @@ class Session():
 		response = requests.get(reward_url)
 		return response
 
-		
+
 	def getType(self):
 		img = self.container.camera.make_photo()
 		type = self.getClass(img)
 		return type
-	
+
 	def adminSession(self):
 		self.container.bott1.up()
 		self.container.bott2.up()
@@ -58,7 +56,7 @@ class Session():
 					break
 		self.container.bott1.down()
 		self.container.bott2.down()
-	
+
 	def bottleSession(self):
 		self.container.top.up()
 		sessionStart = time.time()
@@ -66,10 +64,10 @@ class Session():
 			if(time.time() - sessionStart > cfg.WAIT_LIMIT):
 				self.container.top.down()
 				return False
-		
+
 		self.container.top.down()
 		type = self.getType()
-		
+
 		if(type == "pet"):
 			self.container.player.play_sound(cfg.PLASTIC)
 			self.container.pet.up()
@@ -79,7 +77,7 @@ class Session():
 			self.container.alum.up()
 			self.container.alum.down()
 			self.container.player.play_sound(cfg.ALUMINIUM)
-			rewardUser("pet")
+			rewardUser("al")
 		else:
 			self.container.player.play_sound(cfg.UNKNOWN)
 			self.container.top.up()
@@ -88,7 +86,7 @@ class Session():
 			self.container.top.down()
 			return False
 		return True
-	
+
 	def run(self):
 		exit = False
 		if(not self.foundUser()):
@@ -100,4 +98,3 @@ class Session():
 			while(self.bottleSession()):
 				pass
 		self.container.beeper.beep()
-	
