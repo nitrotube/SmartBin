@@ -1,3 +1,4 @@
+# PINS
 BEEPER = 11
 
 UP_SERVO = 3 # Servo pins
@@ -5,6 +6,7 @@ DOWN_SERVO = 2
 LOCK1_SERVO = 1
 LOCK2_SERVO = 0
 
+# SERVO
 OPEN_UP = 250  # Positions of servo
 CLOSE_UP = 550
 CLOSE_DOWN = 375
@@ -28,3 +30,26 @@ ECHO2 = 35
 
 TRIG3 = 16  # Distance sensors pins (hand check)
 ECHO3 = 18
+
+WAIT_LIMIT = 6
+
+ADMINS = [
+	"17800807D0782",
+]
+
+UNKNOWN = 0
+PLASTIC = 1
+ALUMINIUM = 2
+
+PATH = {
+    "BASE_DIR" : "/home/pi/pywork/",
+    "SerialPort": "/dev/serial0"
+}
+
+EMAIL = {
+    "server" : "smtp.gmail.com",
+    "port" : "587",
+    "login" : "smartbin.warner@gmail.com",
+    "password" : "SBWarner2018",
+    "to" : "e.spirin@smartbin.ru",
+}

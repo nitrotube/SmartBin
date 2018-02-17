@@ -1,0 +1,37 @@
+OOP structure:
+
+Sensor:
+	found() ?
+
+Player:
+	play_sound(path)
+
+Motor:
+	up()
+	down()
+	
+Beeper:
+	beep(time) 
+	on() 
+	off() 
+
+Color:
+	static_color() 
+	dynamic_color() 
+
+Container:
+	
+	Sensor s1
+	Sensor s2
+	Player player
+	Motor up
+	Motor down
+	Motor sorter
+	Session session
+	
+		
+	nextSession()
+	hasSmth() ?
+	
+Session:
+	
