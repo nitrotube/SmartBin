@@ -11,8 +11,8 @@ class Session():
 
 	def getClass(self, path):
 
-		host = '192.168.0.133'
-		port = 5000
+		host = cfg.API_SERVER
+		port = cfg.API_PORT
 
 		client = socket.socket()
 		client.connect((host, port))

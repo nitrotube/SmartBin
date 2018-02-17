@@ -60,3 +60,6 @@ EMAIL = {
     "password" : "SBWarner2018",
     "to" : "e.spirin@smartbin.ru",
 }
+
+API_SERVER = "192.168.0.133"
+API_PORT = 5000
