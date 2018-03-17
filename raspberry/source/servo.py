@@ -1,23 +1,9 @@
 import Adafruit_PCA9685
 import time
+from config import *
 
 pwm = Adafruit_PCA9685.PCA9685()
-UP_SERVO = 3  # Upper servo pin
-DOWN_SERVO = 2  # Down servo pin
-LOCK1_SERVO = 15 #15
-LOCK2_SERVO = 1
-OPEN_UP = 250  # Positions of servo
-CLOSE_UP = 523
-CLOSE_DOWN = 385
-PET_DOWN = 650
-AL_DOWN = 170
-LOCK1_CLOSE = 472
-LOCK1_OPEN = 400
-LOCK2_CLOSE = 297
-LOCK2_OPEN = 380
-RED = 8
-GREEN = 9
-BLUE = 10
+
 pwm.set_pwm_freq(75)
 
 
@@ -52,7 +38,9 @@ def open_lock():
 
 
 while True:
+    open_lock()
     close_up()
+
     pwm.set_pwm(10, 0, 4000)
     for i in range(2000):
         pwm.set_pwm(GREEN, 0, (2000-i)*2)
