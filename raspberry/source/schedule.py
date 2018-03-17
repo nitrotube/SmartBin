@@ -33,7 +33,6 @@ def check_silence():
         result = True
     if (datetime.datetime.now().time() > p7) and (datetime.datetime.now().time() < f7) and (datetime.datetime.today().weekday() == 0):
         result = True
-    elif (datetime.datetime.now().time() > b7) and (datetime.datetime.now().time() < f7) and (datetime.datetime.today().weekday() <> 0):
+    if (datetime.datetime.now().time() > b7) and (datetime.datetime.now().time() < f7) and (datetime.datetime.today().weekday() == 0):
         result = True
-
     return result
