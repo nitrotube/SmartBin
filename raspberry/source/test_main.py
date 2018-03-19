@@ -137,24 +137,24 @@ def contents_type():
 
 def count_fullness(type):
     if type == 'al':
-        fal = open('fullnessal.txt')
+        fal = open('/home/pi/pywork/fullnessal.txt')
         nal = int(fal.read())
         fal.close()
-        fal = open('fullnessal.txt', 'w')
+        fal = open('/home/pi/pywork/fullnessal.txt', 'w')
         fal.write(str(nal+1))
         fal.close()
     else:
-        fpet = open('fullnesspet.txt')
+        fpet = open('/home/pi/pywork/fullnesspet.txt')
         npet = int(fpet.read())
         fpet.close()
-        fpet = open('fullnesspet.txt', 'w')
+        fpet = open('/home/pi/pywork/fullnesspet.txt', 'w')
         fpet.write(str(npet+1))
         fpet.close()
 
 
 def fullness_check():
-    fal = open('fullnessal.txt')
-    fpet = open('fullnesspet.txt')
+    fal = open('/home/pi/pywork/fullnessal.txt')
+    fpet = open('/home/pi/pywork/fullnesspet.txt')
     nal = fal.read()
     npet = fpet.read()
 
@@ -176,10 +176,10 @@ def fullness_check():
                 userok = UART.read(12).decode('utf-8')
                 if userok == "5605B8DF7642":
                     beep()
-                    fpet = open('fullnesspet.txt', 'w')
+                    fpet = open('/home/pi/pywork/fullnesspet.txt', 'w')
                     fpet.write('0')
                     fpet.close()
-                    fal = open('fullnessal.txt', 'w')
+                    fal = open('/home/pi/pywork/fullnessal.txt', 'w')
                     fal.write('0')
                     fal.close()
                     break
@@ -360,6 +360,7 @@ def beep():
 
 try:
     time.sleep(1)
+    beep()
     close_lock()
     logging.info("Process started")
     close_up()
@@ -372,7 +373,7 @@ try:
         logging.info(user)
         beep()
 
-        if user == "5605B8DF76425":  # Maintenance stuff
+        if user == "5605B8DF7642":  # Maintenance stuff
             open_lock()
             user = ""
             static_color(RED)
