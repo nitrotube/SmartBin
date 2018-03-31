@@ -174,14 +174,17 @@ def fullness_check():
             time.sleep(0.2)
             if UART.read() == b'\x02':
                 userok = UART.read(12).decode('utf-8')
-                if userok == "5605B8DF7642":
+                if userok in authorised_Users:
                     beep()
-                    fpet = open('/home/pi/pywork/fullnesspet.txt', 'w')
-                    fpet.write('0')
-                    fpet.close()
-                    fal = open('/home/pi/pywork/fullnessal.txt', 'w')
-                    fal.write('0')
-                    fal.close()
+                    if int(nal) > AL_LIMIT:
+                        fal = open('/home/pi/pywork/fullnessal.txt', 'w')
+                        fal.write('0')
+                        fal.close()
+                    else:
+                        fpet = open('/home/pi/pywork/fullnesspet.txt', 'w')
+                        fpet.write('0')
+                        fpet.close()
+                    static_color(BLUE)
                     break
 
 
@@ -189,7 +192,7 @@ def waiting():  # Dynamic color change while waiting
     global CurGreen, CurBlue, CurRed
     CurGreen = 4000
     CurRed = 0
-    CurBlue = 2000
+    CurBlue = 1500
 
     fullness_check()
 
@@ -204,7 +207,7 @@ def waiting():  # Dynamic color change while waiting
         pwm.set_pwm(BLUE, 0, CurBlue)
 
     while True:
-        for i in range(125):
+        for i in range(100):
             try:
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0,  CurBlue)
@@ -212,12 +215,12 @@ def waiting():  # Dynamic color change while waiting
                 time.sleep(0.3)
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0, CurBlue)
-            CurGreen -= 16
-            CurBlue += 16
+            CurGreen -= 25
+            CurBlue += 25
             if i % 10 == 0 and UART.read() == b'\x02':
                 return
 
-        for i in range(125):
+        for i in range(100):
             try:
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0, CurBlue)
@@ -225,8 +228,8 @@ def waiting():  # Dynamic color change while waiting
                 time.sleep(0.3)
                 pwm.set_pwm(GREEN, 0, CurGreen)
                 pwm.set_pwm(BLUE, 0, CurBlue)
-            CurGreen += 16
-            CurBlue -= 16
+            CurGreen += 25
+            CurBlue -= 25
             if i % 10 == 0 and UART.read() == b'\x02':
                 return
 
@@ -366,6 +369,7 @@ try:
     close_up()
     close_down()
     close_lock()
+    user_reg("5605B8DF7642")
     while True:
         GPIO.output(INNER, 0)
         waiting()
@@ -373,180 +377,185 @@ try:
         logging.info(user)
         beep()
 
-        if user == "5605B8DF7642":  # Maintenance stuff
+        if user in authorised_Users:  # Maintenance stuff
             open_lock()
             user = ""
             static_color(RED)
             logging.info("The bin is opened for maintenance")
-            time.sleep(2)
+            time.sleep(1)
             UART.flushInput()
             while True:
-                time.sleep(0.2)
+                time.sleep(0.3)
                 if UART.read() == b'\x02':
                     userok = UART.read(12).decode('utf-8')
-                    if userok == "5605B8DF7642":
+                    if userok in authorised_Users:
                         beep()
                         logging.info("The bin is normal mode")
                         close_lock()
+                        static_color(BLUE)
                         break
-        try:
-            reg_stat = user_reg(user)
-        except:
-            static_color(RED)
-            time.sleep(1)
-        if reg_stat:
-
-            if schedule.check_silence():
-                os.system('amixer set PCM -- 0%')
-            else:
-                os.system('amixer set PCM -- 100%')
-
-            logging.info("User found")
-            entry_time = time.time()
-            time_exit = False
-            point_sum = 0
-
-            while not time_exit:
-                static_color(GREEN)
-                find_exit = False
-                open_up()
-                GPIO.output(INNER, 1)
-                while (not find_exit) and (not time_exit):
-                    time.sleep(0.3)
-                    current_time = time.time()
-                    if current_time - entry_time > WAIT_LIMIT:
-                        time_exit = True
-                    if something_in():
-                        find_exit = True
-
-                time.sleep(0.5)
-                while not(cheat_check()):
-                    beep()
-                close_up()
-                time.sleep(0.5)
-                if not find_exit:
-                    continue
-
-                if something_in():
-                    logging.info("Something in")
-                    inner_type = ""
-                    try:
-                        inner_type = contents_type()
-                    except:
-                        logging.info("Connection to server failed")
-                        static_color(RED)
-                        while True:
-                            time.sleep(0.2)
-
-                    if inner_type == 'pet':
-                        command = 'mplayer /home/pi/pywork/sounds/plastic.mp3 -af volume=7'
-                        p = Process(target=fun)
-                        p.start()
-                        pet_down()
-                        time.sleep(2)
-                        p.terminate()
-                        if something_in():
-                            close_down()
-                            time.sleep(0.7)
-                            open_up()
-                            while something_in():
-                                for i in range(2):
-                                    dynamic_color(RED)
-                            time.sleep(0.5)
-                            while not (cheat_check()):
-                                beep()
-                            close_up()
-                            time_exit = True
-                        else:
-                            close_down()
-                            time.sleep(0.5)
-                            point_sum += 8
-                            count_fullness('pet')
-                            try:
-                                reward(user, 'pet')
-                            except:
-                                time.sleep(0.5)
-                                reward(user, 'pet')
-                            logging.info('Rewarded for pet!')
-                            for i in range(2):
-                                dynamic_color(GREEN)
-
-                    elif inner_type == 'al':
-                        p = Process(target=fun)
-                        command = 'mplayer /home/pi/pywork/sounds/al.mp3 -af volume=7'
-                        p.start()
-                        al_down()
-                        time.sleep(2)
-                        close_down()
-                        p.terminate()
-                        if something_in():
-                            close_down()
-                            time.sleep(0.7)
-                            open_up()
-                            while something_in():
-                                for i in range(2):
-                                    dynamic_color(RED)
-                            time.sleep(0.5)
-                            while not (cheat_check()):
-                                beep()
-                            close_up()
-                            time_exit = True
-                        else:
-                            close_down()
-                            time.sleep(0.5)
-                            point_sum += 5
-                            count_fullness('al')
-                            try:
-                                reward(user, 'al')
-                            except:
-                                time.sleep(0.5)
-                                reward(user, 'al')
-                            logging.info('Rewarded for al!')
-                            for i in range(2):
-                                dynamic_color(GREEN)
-
-                    else:
-                        open_up()
-                        p = Process(target=fun)
-                        command = 'mplayer /home/pi/pywork/sounds/unknown.mp3 -af volume=7'
-                        p.start()
-                        while something_in():
-                            for i in range(2):
-                                dynamic_color(RED)
-                        time.sleep(0.5)
-                        while not (cheat_check()):
-                            beep()
-                        close_up()
-                        p.terminate()
-                        time_exit = True
-
-                    entry_time = time.time()
-                    find_exit = False
-                else:
-                    entry_time = time.time()
-                    dynamic_color(RED)
-
-            if point_sum > 0:
-                time.sleep(1)
-                p = Process(target=fun)
-                if point_sum <= 29 :
-                    command = 'mplayer /home/pi/pywork/sounds/' + str(point_sum) + '.mp3 -af volume=7'
-                else:
-                    choice = random.randint(1,6)
-                    command = 'mplayer /home/pi/pywork/sounds/alot' + str(choice) + '.mp3 -af volume=7'
-                p.start()
-                time.sleep(2)
-                p.terminate()
-
-            logging.info("Session closed")
-            logging.info('****************************')
-            GPIO.output(INNER, 0)
         else:
-            dynamic_color(RED)
+            try:
+                reg_stat = user_reg(user)
+            except:
+                static_color(RED)
+                time.sleep(1)
+            if reg_stat:
+
+                if schedule.check_silence():
+                    os.system('amixer set PCM -- 0%')
+                else:
+                    os.system('amixer set PCM -- 100%')
+
+                logging.info("User found")
+                time_exit = False
+                point_sum = 0
+
+                while not time_exit:
+                    entry_time = time.time()
+                    static_color(GREEN)
+                    find_exit = False
+                    open_up()
+                    GPIO.output(INNER, 1)
+                    while (not find_exit) and (not time_exit):
+                        time.sleep(0.3)
+                        current_time = time.time()
+                        if current_time - entry_time > WAIT_LIMIT:
+                            time_exit = True
+                        if something_in():
+                            find_exit = True
+
+                    time.sleep(0.5)
+                    while not(cheat_check()):
+                        beep()
+                    close_up()
+                    time.sleep(0.5)
+                    if not find_exit:
+                        continue
+
+                    if something_in():
+                        logging.info("Something in")
+                        inner_type = ""
+                        try:
+                            inner_type = contents_type()
+                        except:
+                            logging.info("Connection to server failed")
+                            static_color(RED)
+                            while True:
+                                time.sleep(0.2)
+
+                        if inner_type == 'pet':
+                            command = 'mplayer /home/pi/pywork/sounds/plastic.mp3 -af volume=7'
+                            p = Process(target=fun)
+                            p.start()
+                            pet_down()
+                            time.sleep(2)
+                            p.terminate()
+                            if something_in():
+                                close_down()
+                                time.sleep(0.7)
+                                open_up()
+                                while something_in():
+                                    for i in range(2):
+                                        dynamic_color(RED)
+                                time.sleep(0.5)
+                                while not (cheat_check()):
+                                    beep()
+                                close_up()
+                                time_exit = True
+                            else:
+                                close_down()
+                                time.sleep(0.5)
+                                point_sum += 8
+                                count_fullness('pet')
+                                try:
+                                    reward(user, 'pet')
+                                except:
+                                    time.sleep(0.5)
+                                    reward(user, 'pet')
+                                logging.info('Rewarded for pet!')
+                                for i in range(2):
+                                    dynamic_color(GREEN)
+
+                        elif inner_type == 'al':
+                            p = Process(target=fun)
+                            command = 'mplayer /home/pi/pywork/sounds/al.mp3 -af volume=7'
+                            p.start()
+                            al_down()
+                            time.sleep(2)
+                            close_down()
+                            p.terminate()
+                            if something_in():
+                                close_down()
+                                time.sleep(0.7)
+                                open_up()
+                                while something_in():
+                                    for i in range(2):
+                                        dynamic_color(RED)
+                                time.sleep(0.5)
+                                while not (cheat_check()):
+                                    beep()
+                                close_up()
+                                time_exit = True
+                            else:
+                                close_down()
+                                time.sleep(0.5)
+                                point_sum += 5
+                                count_fullness('al')
+                                try:
+                                    reward(user, 'al')
+                                except:
+                                    time.sleep(0.5)
+                                    reward(user, 'al')
+                                logging.info('Rewarded for al!')
+                                for i in range(2):
+                                    dynamic_color(GREEN)
+
+                        else:
+                            open_up()
+                            p = Process(target=fun)
+                            command = 'mplayer /home/pi/pywork/sounds/unknown.mp3 -af volume=7'
+                            p.start()
+                            while something_in():
+                                for i in range(2):
+                                    dynamic_color(RED)
+                            time.sleep(0.5)
+                            while not (cheat_check()):
+                                beep()
+                            close_up()
+                            p.terminate()
+                            time_exit = True
+
+                        find_exit = False
+                    else:
+                        dynamic_color(RED)
+
+                if point_sum > 0:
+                    time.sleep(1)
+                    p = Process(target=fun)
+                    if point_sum <= 29 :
+                        command = 'mplayer /home/pi/pywork/sounds/' + str(point_sum) + '.mp3 -af volume=7'
+                    else:
+                        choice = random.randint(1,6)
+                        command = 'mplayer /home/pi/pywork/sounds/alot' + str(choice) + '.mp3 -af volume=7'
+                    p.start()
+                    time.sleep(2)
+                    p.terminate()
+
+                logging.info("Session closed")
+                logging.info('****************************')
+                GPIO.output(INNER, 0)
+            else:
+                dynamic_color(RED)
 
         time.sleep(0.5)
         UART.flushInput()
-
+except:
+    static_color(RED)
+    warn_full.send_warn_full("shit and sadness")
 finally:
     GPIO.cleanup()
     camera.close()
+    close_up()
+    close_down()
+    close_lock()
