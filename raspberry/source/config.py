@@ -2,14 +2,14 @@
 BEEPER = 11
 
 UP_SERVO = 0 # Servo pins
-DOWN_SERVO = 1
+DOWN_SERVO = 8
 LOCK1_SERVO = 2
-LOCK2_SERVO = 3
+LOCK2_SERVO = 12
 
 # SERVO
-OPEN_UP = 160  # Positions of servo
-CLOSE_UP = 407
-CLOSE_DOWN = 395
+OPEN_UP = 180  # Positions of servo
+CLOSE_UP = 423
+CLOSE_DOWN = 380
 PET_DOWN = 650
 AL_DOWN = 170
 LOCK1_CLOSE = 480
@@ -31,10 +31,13 @@ ECHO2 = 35
 TRIG3 = 36  # Distance sensors pins (hand check)
 ECHO3 = 38
 
-AL_LIMIT = 35
-PET_LIMIT = 25
+AL_LIMIT = 45
+PET_LIMIT = 35
 
-WAIT_LIMIT = 7
+WAIT_LIMIT = 6
+
+authorised_Users = ["5605B8DF7642*", "6900338C7FA9"]
+set(authorised_Users)
 
 PATH = {
     "BASE_DIR" : "/home/pi/pywork",
