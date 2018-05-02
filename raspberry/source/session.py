@@ -10,8 +10,8 @@ class Session():
 
 	def getClass(self, path):
 
-		host = '192.168.0.133'
-		port = 5000
+		host = cfg.HOST
+		port = cfg.PORT
 
 		client = socket.socket()
 		client.connect((host, port))
@@ -47,6 +47,7 @@ class Session():
 		return type
 
 	def adminSession(self):
+        self.comtainer.beeper.beep()
 		self.container.lock.go(cfg.MOTOR_STATE_LOCK.OPEN)
         time.sleep(0.5)
 		while True:
@@ -62,10 +63,8 @@ class Session():
 			if(time.time() - sessionStart > 6):
 				self.container.top.go(cfg.MOTOR_STATE_TOP_CLOSE)
 				return False
-
 		self.container.top.go(cfg.MOTOR_STATE_TOP_CLOSE)
 		type = self.getType()
-
 		if(type == "pet"):
 			self.container.sort.go(cfg.MOTOR_STATE_SORT_PET)
 			self.container.sort.go(cfg.MOTOR_STATE_SORT_DEFAULT)
@@ -90,10 +89,8 @@ class Session():
 		exit = False
 		if(not self.foundUser()):
 			return
-		self.container.beeper.beep()
-		if(0):
+		if(0 & self.user in cfg.ADMINIS):
 			self.adminSession()
 		else:
 			while(self.bottleSession()):
 				pass
-		self.container.beeper.beep()

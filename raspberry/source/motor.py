@@ -24,12 +24,16 @@ def test():
     motor.go(cfg.MOTOR_STATE_TOP_OPEN)'''
 
     motor = Motor("SORTER")
-    motor.addState(cfg.MOTOR_STATE_SORT_DEFAULT, [(cfg.MOTOR_PIN_SORT, cfg.MOTOR_VAL_SORT_DEFAULT)])
+    '''motor.addState(cfg.MOTOR_STATE_SORT_DEFAULT, [(cfg.MOTOR_PIN_SORT, cfg.MOTOR_VAL_SORT_DEFAULT)])
     motor.addState(cfg.MOTOR_STATE_SORT_ALUM, [(cfg.MOTOR_PIN_SORT, cfg.MOTOR_VAL_SORT_ALUM)])
     motor.go(cfg.MOTOR_STATE_SORT_ALUM)
     time.sleep(2)
-    motor.go(cfg.MOTOR_STATE_SORT_DEFAULT)
+    motor.go(cfg.MOTOR_STATE_SORT_DEFAULT)'''
+    motor.pwm.set_pwm(7, 0, 4000)
+    while (True):
+        pass
+
 
 if __name__=="__main__":
     mot = Motor("w")
-
+    test()
