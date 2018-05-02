@@ -1,9 +1,8 @@
 import serial
-from config import PATH
-class PassScaner:
-	def __init__(self):
+class RFID_Scanner:
+	def __init__(self, port):
 		self.UART = serial.Serial(
-			port=PATH["SerialPort"],
+			port=port,
 			baudrate=9600,
 			parity=serial.PARITY_NONE,
 			stopbits=serial.STOPBITS_ONE,

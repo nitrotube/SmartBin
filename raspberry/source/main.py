@@ -1,17 +1,17 @@
-from Container import Container
-from Session import Session
+from container import Container
+from session import Session
 
 
 def main():
 
 	c = Container()
 	while True:
-		if(c.scaner.hasCode()):
-			session = Session(c, c.scaner.readCode())
+		if(c.scanner.hasCode()):
+			session = Session(c, c.scanner.readCode())
 			session.run()
 			session = 0
 
 	GPIO.cleanup()
 
-if(__name__=="__main__"):
+if(__name__ == "__main__"):
 	main()

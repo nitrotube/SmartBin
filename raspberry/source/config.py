@@ -1,65 +1,74 @@
-# PINS
+# Motor states
+# TOP
+MOTOR_STATE_TOP_OPEN = 0
+MOTOR_STATE_TOP_CLOSE = 1
+# SORT
+MOTOR_STATE_SORT_DEFAULT = 0
+MOTOR_STATE_SORT_ALUM = 1
+MOTOR_STATE_SORT_PET = 2
+# LOCK
+MOTOR_STATE_LOCK_CLOSE = 0
+MOTOR_STATE_LOCK_OPEN = 1
+
+# Motor pins
+# TOP
+MOTOR_PIN_TOP = 12
+# SORT
+MOTOR_PIN_SORT = 8
+# LOCK
+MOTOR_PIN_LOCK1 = 0
+MOTOR_PIN_LOCK2 = 4
+
+# Motor values
+# TOP
+MOTOR_VAL_TOP_OPEN = 180
+MOTOR_VAL_TOP_CLOSE = 500
+# SORT
+MOTOR_VAL_SORT_DEFAULT = 500
+MOTOR_VAL_SORT_ALUM = 795
+MOTOR_VAL_SORT_PET = 200
+# LOCK
+MOTOR_VAL_LOCK1_CLOSE = 480
+MOTOR_VAL_LOCK1_OPEN = 405
+MOTOR_VAL_LOCK2_CLOSE = 350
+MOTOR_VAL_LOCK2_OPEN = 423
+
+# Periphery
 BEEPER = 11
 
-UP_SERVO = 3 # Servo pins
-DOWN_SERVO = 2
-LOCK1_SERVO = 1
-LOCK2_SERVO = 0
+# Commands
+TURN_ON = 100
 
-# SERVO
-OPEN_UP = 250  # Positions of servo
-CLOSE_UP = 550
-CLOSE_DOWN = 375
-PET_DOWN = 650
-AL_DOWN = 170
-LOCK1_CLOSE = 472
-LOCK1_OPEN = 395
-LOCK2_CLOSE = 297
-LOCK2_OPEN = 380
+# LEDS
+LED_INNER1 = 5
+LED_INNER2 = 7
+LED_STRIP = 6
+LED_MAX_VAL = 4000
 
-RED = 5 # Led pins
-GREEN = 6
-BLUE = 7
-INNER = 13
+# UART
+UART_PORT = '/dev/serial0'
 
+# SENSORS
+SENS1_ECHO = 31
+SENS1_TRIG = 29
+SENS2_ECHO = 35
+SENS2_TRIG = 33
+SENS3_ECHO = 38
+SENS3_TRIG = 36
+SENS_RANGE = (37, 45)
 
-TRIG1 = 31  # Distance sensors pins (bottle detection)
-ECHO1 = 29
-TRIG2 =33
-ECHO2 = 35
+# DATA
+ALUM = 'alum'
+PET = 'pet'
+ERR = 'err'
 
-TRIG3 = 16  # Distance sensors pins (hand check)
-ECHO3 = 18
-
-WAIT_LIMIT = 6
-
-ADMINS = [
-	"7800807D0782",
-]
-
-UNKNOWN = 0
-PLASTIC = 1
-ALUMINIUM = 2
-
-PATH = {
-	"BASE_DIR" : "/home/pi/pywork/",
-	"SerialPort": "/dev/serial0",
-	"PHOTOS" : "/home/pi/pywork/resorces/photos/",
+# Sound player
+SOUNDS = {
+    PET:'/home/pi/pywork/sounds/plastic.mp3',
+    ALUM:'/home/pi/pywork/sounds/al.mp3',
+    ERR:'/home/pi/pywork/sounds/unknown.mp3'
 }
 
-SOUND = {
-	"PLASTIC" : PATH["BASE_DIR"] + "resources/sounds/plastic.mp3",
-	"ALUMINIUM" : PATH["BASE_DIR"] + "resources/sounds/aluminium.mp3",
-	"UNKNOWN" : PATH["BASE_DIR"] + "resources/sounds/unknown.mp3",
-}
-
-EMAIL = {
-    "server" : "smtp.gmail.com",
-    "port" : "587",
-    "login" : "smartbin.warner@gmail.com",
-    "password" : "SBWarner2018",
-    "to" : "e.spirin@smartbin.ru",
-}
-
-API_SERVER = "192.168.0.133"
-API_PORT = 5000
+# CAMERA
+CAMERA =  13
+CAMERA_PATH_PHOTO = '/home/pi/pywork/new/new_photos/'

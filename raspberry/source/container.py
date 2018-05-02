@@ -1,38 +1,88 @@
 import RPi.GPIO as GPIO
-from Motor import Motor
-from Beeper import Beeper
-from Sensor import Sensor
-from Player import Player
-from Camera import Camera
-from PassScaner import PassScaner
+from arduino import Arduino
+from motor import Motor
+from beeper import Beeper
+from sensor import Sensor
+from player import Player
+from camera import Camera
+from RFID_Scanner import RFID_Scanner
 import config as cfg
-
+import time
 
 class Container:
 
-	def __init__(self):
+    def __init__(self):
 		#GPIO.cleanup()
-		self.inner = Sensor(cfg.TRIG2, cfg.ECHO2)
-		self.player = Player()
-		self.top = Motor(cfg.UP_SERVO, cfg.OPEN_UP, cfg.CLOSE_UP, "TOP")
-		self.bott1 = Motor(cfg.LOCK1_SERVO, cfg.LOCK1_OPEN, cfg.LOCK1_CLOSE, "BOOTOM1")
-		self.bott2 = Motor(cfg.LOCK2_SERVO, cfg.LOCK2_OPEN, cfg.LOCK2_CLOSE, "BOTTOM2")
-		self.alum = Motor(cfg.DOWN_SERVO, cfg.AL_DOWN, cfg.CLOSE_DOWN, "ALUMINIUM")
-		self.pet = Motor(cfg.DOWN_SERVO, cfg.PET_DOWN, cfg.CLOSE_DOWN, "PLASTIC")
-		self.camera = Camera(cfg.CAMERA_POWER)
-		self.scaner = PassScaner()
-		self.beeper = Beeper(cfg.BEEPER)
-		self.checker = Sensor(cfg.TRIG3, cfg.ECHO3)
+        # TOP
+        self.top = Motor("TOP")
+        self.top.addState(cfg.MOTOR_STATE_TOP_OPEN, [(cfg.MOTOR_PIN_TOP, cfg.MOTOR_VAL_TOP_OPEN)])
+        self.top.addState(cfg.MOTOR_STATE_TOP_CLOSE, [(cfg.MOTOR_PIN_TOP, cfg.MOTOR_VAL_TOP_CLOSE)])
+        # LOCK
+        self.lock = Motor("LOCK")
+        self.lock.addState(cfg.MOTOR_STATE_LOCK_CLOSE, \
+            [
+                (cfg.MOTOR_PIN_LOCK1, cfg.MOTOR_VAL_LOCK1_CLOSE),
+                (cfg.MOTOR_PIN_LOCK2, cfg.MOTOR_VAL_LOCK2_CLOSE)
+            ])
+        self.lock.addState(cfg.MOTOR_STATE_LOCK_OPEN, \
+            [
+                (cfg.MOTOR_PIN_LOCK1, cfg.MOTOR_VAL_LOCK1_OPEN),
+                (cfg.MOTOR_PIN_LOCK2, cfg.MOTOR_VAL_LOCK2_OPEN)
+            ])
 
-		self.top.down()
-		self.bott1.down()
-		self.bott2.down()
-		self.top.down()
-		self.alum.down()
-		self.beeper.off()
+        # SORT
+        self.sort = Motor("SORTER")
+        self.sort.addState(cfg.MOTOR_STATE_SORT_DEFAULT, [(cfg.MOTOR_PIN_SORT, cfg.MOTOR_VAL_SORT_DEFAULT)])
+        self.sort.addState(cfg.MOTOR_STATE_SORT_ALUM, [(cfg.MOTOR_PIN_SORT, cfg.MOTOR_VAL_SORT_ALUM)])
+        self.sort.addState(cfg.MOTOR_STATE_SORT_PET, [(cfg.MOTOR_PIN_SORT, cfg.MOTOR_VAL_SORT_PET)])
+        
+        # ARDUINO
+        #self.arduino = Arduino()
 
-	def smthIn(self):
-		return self.inner.found() and self.checker.cheat_check()
+        self.beeper = Beeper(cfg.BEEPER)
+        self.top.go(cfg.MOTOR_STATE_TOP_CLOSE)
+        self.sort.go(cfg.MOTOR_STATE_SORT_DEFAULT)
+        self.lock.go(cfg.MOTOR_STATE_LOCK_CLOSE)
+        #self.arduino.write(cfg.TURN_ON)
+        self.sens1 = Sensor(cfg.SENS1_TRIG, cfg.SENS1_ECHO, cfg.SENS_RANGE)
+        self.sens2 = Sensor(cfg.SENS2_TRIG, cfg.SENS2_ECHO, cfg.SENS_RANGE)
+        self.sens3 = Sensor(cfg.SENS3_TRIG, cfg.SENS3_ECHO, cfg.SENS_RANGE)
+        self.player = Player()
+        self.camera = Camera(cfg.CAMERA)
+        self.scanner = RFID_Scanner(cfg.UART_PORT)
 
-if(__name__=="__main__"):
-	t = Container()
+    def printDistances(self):
+        print(self.sens1.getDistance())
+        print(self.sens2.getDistance())
+        print(self.sens3.getDistance())
+    def smthIn(self):
+        return self.sens1.found() or self.sens2.found() or self.sens3.found()
+
+def test():
+    cont = Container()
+    #cont.sort.go(cfg.MOTOR_STATE_SORT_DEFAULT)
+    '''while(1):
+        print(cont.sens1.found())
+        print(cont.sens2.found())
+        print(cont.sens3.found())
+        print('------------')
+        time.sleep(0.5)''' # Sensors
+
+    # cont.player.play_sound(cfg.ALUM)
+    #print(cont.camera.make_photo())
+    while(True & 0):
+        if(cont.scanner.hasCode()):
+            print(cont.scanner.readCode())
+        time.sleep(0.7)
+    while (True & 0):
+        cont.sort.go(cfg.MOTOR_STATE_SORT_ALUM)    
+        time.sleep(2)
+        cont.sort.go(cfg.MOTOR_STATE_SORT_PET)
+        time.sleep(2)
+    cont.lock.go(cfg.MOTOR_STATE_LOCK_OPEN)
+    time.sleep(2)
+    cont.lock.go(cfg.MOTOR_STATE_LOCK_CLOSE)
+    
+
+if(__name__ == "__main__"):
+	test()

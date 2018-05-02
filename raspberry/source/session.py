@@ -1,4 +1,3 @@
-import Container
 import config as cfg
 import time
 import requests
@@ -11,8 +10,8 @@ class Session():
 
 	def getClass(self, path):
 
-		host = cfg.API_SERVER
-		port = cfg.API_PORT
+		host = '192.168.0.133'
+		port = 5000
 
 		client = socket.socket()
 		client.connect((host, port))
@@ -48,42 +47,42 @@ class Session():
 		return type
 
 	def adminSession(self):
-		self.container.bott1.up()
-		self.container.bott2.up()
+		self.container.lock.go(cfg.MOTOR_STATE_LOCK.OPEN)
+        time.sleep(0.5)
 		while True:
 			if(self.container.scaner.hasCode()):
 				if(self.container.scaner.readCode() == self.user):
 					break
-		self.container.bott1.down()
-		self.container.bott2.down()
+		self.container.lock.go(cfg.MOTOR_STATE_LOCK_CLOSE)
 
 	def bottleSession(self):
-		self.container.top.up()
+		self.container.top.go(cfg.MOTOR_STATE_TOP_OPEN)
 		sessionStart = time.time()
 		while(not self.container.smthIn()):
-			if(time.time() - sessionStart > cfg.WAIT_LIMIT):
-				self.container.top.down()
+			if(time.time() - sessionStart > 6):
+				self.container.top.go(cfg.MOTOR_STATE_TOP_CLOSE)
 				return False
 
-		self.container.top.down()
+		self.container.top.go(cfg.MOTOR_STATE_TOP_CLOSE)
 		type = self.getType()
 
 		if(type == "pet"):
-			self.container.player.play_sound(cfg.PLASTIC)
-			self.container.pet.up()
-			self.container.pet.down()
+			self.container.sort.go(cfg.MOTOR_STATE_SORT_PET)
+			self.container.sort.go(cfg.MOTOR_STATE_SORT_DEFAULT)
+			self.container.player.play_sound(cfg.PET)
 			rewardUser("pet")
 		elif(type == "al"):
-			self.container.alum.up()
-			self.container.alum.down()
-			self.container.player.play_sound(cfg.ALUMINIUM)
+			self.container.sort.go(cfg.MOTOR_STATE_SORT_ALUM)
+			self.container.sort.go(cfg.MOTOR_STATE_SORT_DEFAULT)
+			self.container.player.play_sound(cfg.ALUM)
 			rewardUser("al")
 		else:
-			self.container.player.play_sound(cfg.UNKNOWN)
-			self.container.top.up()
+			self.container.player.play_sound(cfg.ERR)
+			self.container.top.go(cfg.MOTOR_STATE_TOP_OPEN)
 			while(self.container.smthIn()):
 				pass
-			self.container.top.down()
+            time.sleep(1)
+			self.container.top.go(cfg.MOTOR_STATE_TOP_CLOSE)
 			return False
 		return True
 
@@ -92,7 +91,7 @@ class Session():
 		if(not self.foundUser()):
 			return
 		self.container.beeper.beep()
-		if(self.user in cfg.ADMINS):
+		if(0):
 			self.adminSession()
 		else:
 			while(self.bottleSession()):

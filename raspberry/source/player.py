@@ -1,5 +1,5 @@
 import os
-from config import SOUNDS
+import config as cfg
 from multiprocessing import Process
 
 class Player:
@@ -10,12 +10,12 @@ class Player:
 		pass
 
 	def play_sound(self, type):
-		if(type == cfg.PLASTIC):
-			self.command = "mplayer " + SOUNDS["PLASTIC"] + " -af volume=7"
-		elif (type==cfg.ALUMINIUM):
-			self.command = "mplayer " + SOUNDS["ALUMINIUM"] + " -af volume=7"
+		if(type == cfg.PET):
+			self.command = "mplayer " + cfg.SOUNDS[cfg.PET] + " -af volume=7"
+		elif (type==cfg.ALUM):
+			self.command = "mplayer " + cfg.SOUNDS[cfg.ALUM] + " -af volume=7"
 		else:
-			self.command = "mplayer " + SOUNDS["UNKNOWN"] + " -af volume=7"
+			self.command = "mplayer " + cfg.SOUNDS[cfg.ERR] + " -af volume=7"
 		self.process = Process(target=self.cmd_play)
 		self.process.start()
 		self.command = ""
