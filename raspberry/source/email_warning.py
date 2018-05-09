@@ -10,7 +10,7 @@ def send_warn_full():
     pi_pass = EMAIL["password"]
     to = EMAIL["to"]
 
-    body = '<h1 color = "red" font = "Times New Roman">The bin is full of sheet </h1>'
+    body = '<h1 color = "red" font = "Times New Roman">The bin is full of shit and sadness </h1>'
     title = 'SBWarning'
     msg = MIMEText((body),'html')
 
