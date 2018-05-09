@@ -32,7 +32,7 @@ class Player:
             self.command = "mplayer " + cfg.SOUNDS_BASE_DIR + str(score) + ".mp3" + " -af volume=7"
         else:
             choice = random.randInt(1,6)
-            self.command = "mplayer " + cfg.SOUNDS_BASE_DIR + "alot" + str(choise) + ".mp3" + " -af colume=7"
+            self.command = "mplayer " + cfg.SOUNDS_BASE_DIR + "alot" + str(choice) + ".mp3" + " -af colume=7"
         self.process = Process(target=self.cmd_play)
         self.process.start()
         self.command = ""
