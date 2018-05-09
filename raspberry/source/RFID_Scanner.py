@@ -1,6 +1,7 @@
 import serial
 import Adafruit_PCA9685
 import config as cfg
+import time
 
 class RFID_Scanner:
     def __init__(self, port):
@@ -24,19 +25,33 @@ class RFID_Scanner:
             else:
                 self.CODE = ""
             self.UART.flushInput()
-            return ""
-        res = self.CODE
+        return self.CODE
+
+    def getCode(self):
+        r = self.CODE
         self.CODE = ""
-        return res
+        return r
 
     def hasCode(self):
-        if(self.CODE == ""):
-            self.readCode()
-            return False
-        else:
+        self.readCode()
+        if(self.CODE != ""):
             return True
+        return False
 
 def test():
     s = RFID_Scanner(cfg.UART_PORT)
-if __name__ == "__name__":
+    while 1:
+        if(not s.hasCode()):
+            continue
+        k = 0
+        code = s.getCode()
+        t1 = time.time()
+        print(t1)
+        while(t1 + 1.0 > time.time()):
+            if(s.hasCode()):
+                tmp = s.getCode()
+                if(tmp == code):
+                    k+=1
+        print(k)
+if __name__ == "__main__":
     test()

@@ -16,6 +16,7 @@ class Motor:
     def go(self, state):
         for var in self.states[state]:
             self.pwm.set_pwm(var[0], 0, var[1])
+        time.sleep(1.5)
 
 def test():
     '''motor = Motor("TOP")

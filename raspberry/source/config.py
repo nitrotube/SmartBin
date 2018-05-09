@@ -25,8 +25,8 @@ MOTOR_VAL_TOP_OPEN = 150
 MOTOR_VAL_TOP_CLOSE = 520
 # SORT
 MOTOR_VAL_SORT_DEFAULT = 525
-MOTOR_VAL_SORT_ALUM = 795
-MOTOR_VAL_SORT_PET = 200
+MOTOR_VAL_SORT_PET = 795
+MOTOR_VAL_SORT_ALUM = 200
 # LOCK
 MOTOR_VAL_LOCK1_CLOSE = 480
 MOTOR_VAL_LOCK1_OPEN = 405
@@ -62,12 +62,17 @@ ALUM = 'alum'
 PET = 'pet'
 ERR = 'err'
 
+# BOTTLES
+MAX_PET = 3
+MAX_AL = 30
+
 # Sound player
 SOUNDS = {
     PET:'/home/pi/pywork/sounds/plastic.mp3',
     ALUM:'/home/pi/pywork/sounds/al.mp3',
     ERR:'/home/pi/pywork/sounds/unknown.mp3'
 }
+SOUNDS_BASE_DIR = '/home/pi/pywork/sounds/'
 
 # CAMERA
 CAMERA =  13
@@ -78,7 +83,7 @@ HOST = '192.168.0.133'
 PORT = 5000
 
 # ADMINS
-ADMINS = set(['5605B8DF7642'])
+ADMINS = set(['5605B8DF7642', '7800807D0782'])
 
 # LEDS
 # INNER LEDS
@@ -89,12 +94,21 @@ LED2_PIN = 7
 SCANNER_LED = 6
 
 # ARDUINO 
-ARDUINO_SERIAL_PORT = '/dev/ttyACM2'
+ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
 
 # LED STATES
-SAME = 0
-WAITING = 1
-WARNING = 2
-FATAL_ERR = 3
-SESSION = 4
-REWARD = 5
+LEDS_SAME = 0
+LEDS_WAITING = 1
+LEDS_WARNING = 2
+LEDS_FATAL_ERR = 3
+LEDS_SESSION = 4
+LEDS_REWARD = 5
+
+# EMAIL
+EMAIL = {
+    "server" : "smtp.gmail.com",
+    "port" : "587",
+    "login" : "smartbin.warner@gmail.com",
+    "password" : "SBWarner2018",
+    "to" : "e.spirin@smartbin.ru",
+}
