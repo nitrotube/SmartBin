@@ -23,4 +23,5 @@
 19. Облачный Windows-сервер для работы мобильного приложения
 
 Текущий датасет: https://drive.google.com/open?id=1dLL410VNiuUBaY5jsnBc1uPYVEK25qb2
+
 Чертежи: https://drive.google.com/open?id=1rsU_gYMXewrPLNE9VWskop4k-vpR8FFo
