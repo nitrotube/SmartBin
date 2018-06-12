@@ -25,3 +25,5 @@
 Текущий датасет: https://drive.google.com/open?id=1dLL410VNiuUBaY5jsnBc1uPYVEK25qb2
 
 Чертежи: https://drive.google.com/open?id=1rsU_gYMXewrPLNE9VWskop4k-vpR8FFo
+
+Инструкция по развёртыванию Inception V3 на своем компьютере: https://docs.google.com/document/d/143ESrmt8EgKRiwzMRSPazqpZ9caW79_0hbj90MR9dFE/edit?usp=sharing
